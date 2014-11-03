@@ -4,9 +4,11 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -42,13 +44,15 @@ public class MainFragment extends Fragment {
     }
 
 
+
     class CreateNewDocumentOnClickListener implements View.OnClickListener
     {
         @Override
         public void onClick(View v) {
             FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.replace(R.id.container, new NewDocumentFragment());
+            ft.add(R.id.container, new NewDocumentFragment());
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+            ft.addToBackStack(null);
             ft.commit();
         }
     }

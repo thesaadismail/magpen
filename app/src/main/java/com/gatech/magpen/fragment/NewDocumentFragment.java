@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -27,8 +28,22 @@ public class NewDocumentFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_new_document, container, false);
         ButterKnife.inject(this, rootView);
 
+        setHasOptionsMenu(true);
         parentActivity.getSupportActionBar().setHomeButtonEnabled(true);
         parentActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         return rootView;
+    }
+
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId())
+        {
+            case android.R.id.home:
+                // app icon in action bar clicked; goto parent activity.
+                getFragmentManager().popBackStack();
+                return true;
+        }
+
+        return false;
     }
 }
