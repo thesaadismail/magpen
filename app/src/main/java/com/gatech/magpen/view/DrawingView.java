@@ -2,6 +2,7 @@ package com.gatech.magpen.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import android.graphics.Bitmap;
@@ -15,6 +16,7 @@ import android.view.MotionEvent;
  */
 public class DrawingView extends View {
 
+    private static final String TAG = "DrawingView";
     //drawing path
     private Path drawPath;
     //drawing and canvas paint
@@ -39,7 +41,7 @@ public class DrawingView extends View {
         drawPaint.setColor(paintColor);
 
         drawPaint.setAntiAlias(true);
-        drawPaint.setStrokeWidth(20);
+        drawPaint.setStrokeWidth(3);
         drawPaint.setStyle(Paint.Style.STROKE);
         drawPaint.setStrokeJoin(Paint.Join.ROUND);
         drawPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -68,6 +70,7 @@ public class DrawingView extends View {
                 drawPath.moveTo(touchX, touchY);
                 break;
             case MotionEvent.ACTION_MOVE:
+                Log.d(TAG, touchX + " " + touchY);
                 drawPath.lineTo(touchX, touchY);
                 break;
             case MotionEvent.ACTION_UP:
