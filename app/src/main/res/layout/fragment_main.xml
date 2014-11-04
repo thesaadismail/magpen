@@ -8,25 +8,16 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context=".MainActivity$PlaceholderFragment">
 
-    <Button
+
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="View Documents"
-        android:id="@+id/viewDocumentsButton"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Enter Virtual World"
-        android:id="@+id/virtualWorldButton"
-        android:layout_below="@+id/viewDocumentsButton"
-        android:layout_alignRight="@+id/viewDocumentsButton"
-        android:layout_alignEnd="@+id/viewDocumentsButton"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:gravity="center"
+        android:text="@string/documentsListEmptyMessage"
+        android:id="@+id/documentsListEmptyTextView"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

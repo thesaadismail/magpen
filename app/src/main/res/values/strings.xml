@@ -4,5 +4,8 @@
     <string name="app_name">MagPen</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="action_enterVirtualWorld">Enter Virtual World</string>
+    <string name="action_viewSensorReadings">View Sensor Readings</string>
+    <string name="documentsListEmptyMessage">You don\'t have any documents yet! What are you waiting for? Tap the add icon on the bottom right to get started.</string>
 
 </resources>
