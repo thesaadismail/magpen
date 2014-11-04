@@ -7,5 +7,8 @@
     <string name="action_enterVirtualWorld">Enter Virtual World</string>
     <string name="action_viewSensorReadings">View Sensor Readings</string>
     <string name="documentsListEmptyMessage">You don\'t have any documents yet! What are you waiting for? Tap the add icon on the bottom right to get started.</string>
+    <string name="filter_box_text">Filter</string>
+    <string name="readings_box_text">Readings</string>
+    <string name="zero_button_text"> Zero Readings</string>
 
 </resources>
