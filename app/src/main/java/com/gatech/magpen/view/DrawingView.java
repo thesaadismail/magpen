@@ -85,4 +85,20 @@ public class DrawingView extends View {
         return true;
     }
 
+    public void penUp()
+    {
+        drawCanvas.drawPath(drawPath, drawPaint);
+        drawPath.reset();
+    }
+
+    public void penDown(float x, float y)
+    {
+        drawPath.moveTo(x, y);
+    }
+
+    public void penMove(float x, float y)
+    {
+        drawPath.moveTo(x, y);
+    }
+
 }

@@ -3,6 +3,7 @@ package com.gatech.magpen.fragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.graphics.Color;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.ActionBarActivity;
@@ -22,6 +23,7 @@ import butterknife.OnClick;
 public class MainFragment extends Fragment {
 
     private ActionBarActivity parentActivity;
+    private FloatingActionButton fabButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -31,7 +33,7 @@ public class MainFragment extends Fragment {
 
         parentActivity = (ActionBarActivity)getActivity();
 
-        FloatingActionButton fabButton = new FloatingActionButton.Builder(parentActivity)
+        fabButton = new FloatingActionButton.Builder(parentActivity)
                 .withDrawable(getResources().getDrawable(R.drawable.ic_note_add_grey600_24dp))
                 .withButtonColor(Color.parseColor("#e5f5f9"))
                 .withGravity(Gravity.BOTTOM | Gravity.RIGHT)
@@ -42,8 +44,6 @@ public class MainFragment extends Fragment {
 
         return rootView;
     }
-
-
 
     class CreateNewDocumentOnClickListener implements View.OnClickListener
     {
