@@ -7,6 +7,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -22,6 +23,7 @@ import butterknife.OnClick;
 
 public class MainFragment extends Fragment {
 
+    private static final String TAG = "MainFragment";
     private ActionBarActivity parentActivity;
     private FloatingActionButton fabButton;
 
@@ -50,11 +52,25 @@ public class MainFragment extends Fragment {
         @Override
         public void onClick(View v) {
             FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.add(R.id.container, new NewDocumentFragment());
+            ft.replace(R.id.container, new NewDocumentFragment());
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
             ft.addToBackStack(null);
             ft.commit();
         }
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fabButton.setVisibility(View.VISIBLE);
+        parentActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        fabButton.setVisibility(View.GONE);
+    }
+
 
 }
