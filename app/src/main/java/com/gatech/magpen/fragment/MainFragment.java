@@ -3,23 +3,17 @@ package com.gatech.magpen.fragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.graphics.Color;
-import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import com.gatech.magpen.R;
 import com.gatech.magpen.view.FloatingActionButton;
 
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public class MainFragment extends Fragment {
 
@@ -71,6 +65,5 @@ public class MainFragment extends Fragment {
         super.onPause();
         fabButton.setVisibility(View.GONE);
     }
-
 
 }

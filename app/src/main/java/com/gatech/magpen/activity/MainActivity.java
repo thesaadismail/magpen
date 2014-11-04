@@ -2,21 +2,15 @@ package com.gatech.magpen.activity;
 
 import android.support.v7.app.ActionBarActivity;
 
-import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.os.Build;
-import android.widget.Button;
 
 import com.gatech.magpen.R;
 import com.gatech.magpen.fragment.MainFragment;
-import com.gatech.magpen.fragment.NewDocumentFragment;
+import com.gatech.magpen.fragment.SensorReadingsFragment;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -51,6 +45,14 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
+            return true;
+        }
+        else if(id == R.id.action_viewSensorReadings){
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.replace(R.id.container, new SensorReadingsFragment());
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+            ft.addToBackStack(null);
+            ft.commit();
             return true;
         }
         return super.onOptionsItemSelected(item);

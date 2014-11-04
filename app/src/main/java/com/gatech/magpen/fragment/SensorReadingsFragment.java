@@ -8,9 +8,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -132,6 +130,18 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
         rBox.setOnCheckedChangeListener(null);
         zb.setOnClickListener(null);
         super.onStop();
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId())
+        {
+            case android.R.id.home:
+                // app icon in action bar clicked; goto parent activity.
+                getFragmentManager().popBackStack();
+                return true;
+        }
+
+        return false;
     }
 
     @Override
