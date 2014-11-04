@@ -88,6 +88,7 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
         return rootView;
     }
 
+    // Listeners for checkboxes and zero button
     private void setUpListeners() {
 
         filterListener = new CompoundButton.OnCheckedChangeListener() {
@@ -147,6 +148,7 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
     @Override
     public void onSensorChanged(SensorEvent event) {
 
+        // if currently trying to zero the sensor
         if(isZeroing){
 
             if(zeroX.size() >= 30){
@@ -172,6 +174,7 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
             }
 
         }
+        // else pass values to the sensorReadingView
         else {
             sensorReadingsView.addValues(event.values.clone(), tv);
             sensorReadingsView.invalidate();
@@ -184,7 +187,7 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
 
     }
 
-
+    // Return the avg value of floats in the array
     private float avgArray(ArrayList<Float> in){
 
         float total = 0.0f;

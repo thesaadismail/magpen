@@ -47,6 +47,7 @@ public class SensorReadingsView extends View{
         zeros = new float[] {0.0f,0.0f,0.0f};
     }
 
+    // Draw "graphed" readings / magnet location
     protected void onDraw(Canvas canvas){
 
         super.onDraw(canvas);
@@ -60,6 +61,7 @@ public class SensorReadingsView extends View{
         paint.setStrokeWidth(3.0f);
         canvas.drawPaint(paint);
 
+        // Graphed Readings
         if(showReadings){
 
             paint.setColor(Color.BLUE);
@@ -86,6 +88,7 @@ public class SensorReadingsView extends View{
                 }
             }
 
+            // Clear arrays if too large to fit on a single screen
             if (xs.size() > width / 2) {
                 xs.clear();
                 ys.clear();
@@ -94,12 +97,17 @@ public class SensorReadingsView extends View{
 
         }
 
+        // Magnet Location
         else{
+
+            paint.setColor(Color.BLUE);
+            canvas.drawCircle(width - prev[0] - zeros[0], height + prev[1] - zeros[1], 10, paint);
 
         }
 
     }
 
+    // Simple low pass filter
     public float[] lowPass(float[] in, float[] out){
         if(out == null) return in;
         for(int i = 0; i < in.length; i++){
@@ -108,11 +116,18 @@ public class SensorReadingsView extends View{
         return out;
     }
 
+    // Take in sensor reading values and apply filter if enabled
     public void addValues(float[] vals, TextView tv){
+        /*
+         * IMPORTANT: Stored values do not have the zero offset applied
+         */
 
+
+        // Apply filter
         if(isFiltered)
             prev = lowPass(vals,prev);
 
+        // Raw Readings
         else
             prev = vals;
 
@@ -139,6 +154,7 @@ public class SensorReadingsView extends View{
         showReadings = readingsFlag;
     }
 
+    // Set the offsets for zeroing the sensor
     public void setZeros(float x, float y, float z){
         zeros = new float[] {x,y,z};
     }
