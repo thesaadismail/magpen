@@ -15,7 +15,11 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnClick;
+
 import com.gatech.magpen.R;
+import com.gatech.magpen.helper.MagPoint;
+import com.gatech.magpen.helper.MagPointsHelper;
 import com.gatech.magpen.view.SensorReadingsView;
 
 import java.util.ArrayList;
@@ -41,6 +45,7 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
     private ArrayList<Float> zeroY;
     private ArrayList<Float> zeroZ;
     private float[] prev;
+    private float[] actualValues;
 
     //Listeners
     private CompoundButton.OnCheckedChangeListener filterListener;
@@ -53,6 +58,10 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
     private CheckBox rBox;
     private Button zb;
 
+    private MagPoint topLeftMagPoint;
+    private MagPoint topRightMagPoint;
+    private MagPoint bottomLeftMagPoint;
+    private MagPoint bottomRightMagPoint;
     // Flags
     private boolean isZeroing;
 
@@ -113,6 +122,32 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
         };
 
     }
+
+    @OnClick(R.id.calibrateTopLeftButton)
+    public void calibrateTopLeft()
+    {
+        topLeftMagPoint = new MagPoint(actualValues[0], actualValues[1], actualValues[2]);
+    }
+
+    @OnClick(R.id.calibrateTopRightButton)
+    public void calibrateTopRight()
+    {
+        topRightMagPoint = new MagPoint(actualValues[0], actualValues[1], actualValues[2]);
+    }
+
+    @OnClick(R.id.calibrateBottomLeftButton)
+    public void calibrateBottomLeft()
+    {
+        bottomLeftMagPoint = new MagPoint(actualValues[0], actualValues[1], actualValues[2]);
+    }
+
+
+    @OnClick(R.id.calibrateBottomRightButton)
+    public void calibrateBottomRight()
+    {
+        bottomRightMagPoint = new MagPoint(actualValues[0], actualValues[1], actualValues[2]);
+    }
+
 
     @Override
     public void onResume(){
@@ -176,7 +211,19 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
         }
         // else pass values to the sensorReadingView
         else {
-            sensorReadingsView.addValues(event.values.clone(), tv);
+            actualValues = event.values.clone();
+
+            float[] calculatedValues = {0,0,0};
+            if(topRightMagPoint != null && topLeftMagPoint != null && bottomLeftMagPoint != null && bottomRightMagPoint!= null)
+            {
+                calculatedValues = MagPointsHelper.interpolationUsingFourEdges(topLeftMagPoint.toFloatArray(),
+                        topRightMagPoint.toFloatArray(),
+                        bottomLeftMagPoint.toFloatArray(),
+                        bottomRightMagPoint.toFloatArray(),
+                        actualValues);
+            }
+
+            sensorReadingsView.addValues(event.values.clone(), calculatedValues, tv);
             sensorReadingsView.invalidate();
         }
 
@@ -188,16 +235,15 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
     }
 
     // Return the avg value of floats in the array
-    private float avgArray(ArrayList<Float> in){
+    private float avgArray(ArrayList<Float> in) {
 
         float total = 0.0f;
 
-        for(int i = 0; i < in.size(); i++){
+        for (int i = 0; i < in.size(); i++) {
             total += in.get(i);
         }
 
-        return total/(float)in.size();
+        return total / (float) in.size();
 
     }
-
 }

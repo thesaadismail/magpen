@@ -5,9 +5,13 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.gatech.magpen.helper.MagPointsHelper;
+
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 /**
@@ -15,6 +19,7 @@ import java.util.ArrayList;
  */
 public class SensorReadingsView extends View{
 
+    private static final String TAG = "SensorReadingsView";
     // Flags
     private boolean isFiltered;
     private boolean showReadings;
@@ -27,6 +32,7 @@ public class SensorReadingsView extends View{
     // Current Data
     private float[] prev;
     private float[] zeros;
+    private float[] calculatedValues;
 
     // Misc
     private float yScale = 5.0f;
@@ -101,7 +107,11 @@ public class SensorReadingsView extends View{
         else{
 
             paint.setColor(Color.BLUE);
-            canvas.drawCircle(width - prev[0] - zeros[0], height + prev[1] - zeros[1], 10, paint);
+           // Log.d(TAG, "x: " + prev[0] + "\ty: " + prev[1] + "\tz: " + prev[2]);
+           // Log.d(TAG, "0x: "+zeros[0]+"\t0y: "+zeros[1]+"\t0z: "+zeros[2]+"\n");
+            float circleX = prev[0] - zeros[0];
+            float circleY = prev[2] - zeros[2];
+            canvas.drawCircle(Math.abs(circleX)*5, Math.abs(circleY)*5, 10, paint);
 
         }
 
@@ -117,11 +127,10 @@ public class SensorReadingsView extends View{
     }
 
     // Take in sensor reading values and apply filter if enabled
-    public void addValues(float[] vals, TextView tv){
+    public void addValues(float[] vals, float[] calculatedValues, TextView tv){
         /*
          * IMPORTANT: Stored values do not have the zero offset applied
          */
-
 
         // Apply filter
         if(isFiltered)
@@ -136,11 +145,18 @@ public class SensorReadingsView extends View{
         zs.add(prev[2]);
 
         if(tv != null)
-            tv.setText("X: " + Float.toString(prev[0] - zeros[0]) + "\n" +
-                            "Y: " + Float.toString(prev[1] - zeros[1]) + "\n" +
-                            "Z: " + Float.toString(prev[2] - zeros[2]) + "\n" +
-                            "Angle: " + Double.toString(Math.toDegrees(Math.atan((prev[1]-zeros[1])/(prev[0]-zeros[0]))))
-            );
+        {
+            String readingsText = String.format(" X: %.1f (%.1f) \n Y: %.1f (%.1f) \n Z: %.1f (%.1f) \n Angle: %.1f (%.1f)",
+                    prev[0] - zeros[0],
+                    640*calculatedValues[0],
+                    prev[1] - zeros[1],
+                    480*calculatedValues[1],
+                    prev[2] - zeros[2],
+                    0.0f,
+                    Math.toDegrees(Math.atan((prev[1]-zeros[1])/(prev[0]-zeros[0]))),
+                    Math.toDegrees(Math.atan((zeros[1])/(zeros[0]))));
+            tv.setText(readingsText);
+        }
 
     }
 

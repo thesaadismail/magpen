@@ -35,11 +35,43 @@
                     android:id="@+id/readings_box" android:checked="true"/>
         </LinearLayout>
     </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Top ←"
+            android:id="@+id/calibrateTopLeftButton" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Top →"
+            android:id="@+id/calibrateTopRightButton" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bottom ←"
+            android:id="@+id/calibrateBottomLeftButton" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bottom →"
+            android:id="@+id/calibrateBottomRightButton" />
+    </LinearLayout>
+
     <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/zero_button_text"
             android:id="@+id/zero_button"/>
+
     <view android:layout_width="fill_parent"
           android:layout_height="fill_parent"
           class="com.gatech.magpen.view.SensorReadingsView" android:id="@+id/sensorReadingsView"

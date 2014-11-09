@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import com.gatech.magpen.R;
 import com.gatech.magpen.fragment.MainFragment;
 import com.gatech.magpen.fragment.SensorReadingsFragment;
+import com.gatech.magpen.fragment.VirtualWorldFragment;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -50,6 +51,14 @@ public class MainActivity extends ActionBarActivity {
         else if(id == R.id.action_viewSensorReadings){
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             ft.replace(R.id.container, new SensorReadingsFragment());
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+            ft.addToBackStack(null);
+            ft.commit();
+            return true;
+        }
+        else if(id == R.id.action_enterVirtualWorld){
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.replace(R.id.container, new VirtualWorldFragment());
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
             ft.addToBackStack(null);
             ft.commit();
