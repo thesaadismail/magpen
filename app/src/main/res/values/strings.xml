@@ -10,5 +10,6 @@
     <string name="filter_box_text">Filter</string>
     <string name="readings_box_text">Readings</string>
     <string name="zero_button_text"> Zero Readings</string>
+    <string name="calibration_button_text">Calibrate Top Left</string>
 
 </resources>

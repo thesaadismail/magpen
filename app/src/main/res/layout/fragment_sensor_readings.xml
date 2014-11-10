@@ -40,6 +40,11 @@
             android:layout_height="wrap_content"
             android:text="@string/zero_button_text"
             android:id="@+id/zero_button"/>
+    <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/calibration_button_text"
+            android:id="@+id/calibrate_button"/>
     <view android:layout_width="fill_parent"
           android:layout_height="fill_parent"
           class="com.gatech.magpen.view.SensorReadingsView" android:id="@+id/sensorReadingsView"

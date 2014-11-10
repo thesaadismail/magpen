@@ -46,12 +46,14 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
     private CompoundButton.OnCheckedChangeListener filterListener;
     private CompoundButton.OnCheckedChangeListener readingsListener;
     private View.OnClickListener zeroButtonListener;
+    private View.OnClickListener calibrateButtonlistener;
 
     // Components
     private TextView tv;
     private CheckBox fBox;
     private CheckBox rBox;
     private Button zb;
+    private Button cb;
 
     // Flags
     private boolean isZeroing;
@@ -76,6 +78,7 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
         fBox = (CheckBox) rootView.findViewById(R.id.filter_box);
         rBox = (CheckBox) rootView.findViewById(R.id.readings_box);
         zb = (Button) rootView.findViewById(R.id.zero_button);
+        cb = (Button) rootView.findViewById(R.id.calibrate_button);
 
         isZeroing = false;
 
@@ -112,6 +115,28 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
             }
         };
 
+        calibrateButtonlistener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(sensorReadingsView.calibrationState < 4){
+                    sensorReadingsView.setCalibration(prev.clone());
+                    switch(sensorReadingsView.calibrationState){
+                        case 1:
+                            cb.setText("Calibrate Top Right");
+                            break;
+                        case 2:
+                            cb.setText("Calibrate Bottom Left");
+                            break;
+                        case 3:
+                            cb.setText("Calibrate Bottom Right");
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        };
+
     }
 
     @Override
@@ -121,6 +146,7 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
         fBox.setOnCheckedChangeListener(filterListener);
         rBox.setOnCheckedChangeListener(readingsListener);
         zb.setOnClickListener(zeroButtonListener);
+        cb.setOnClickListener(calibrateButtonlistener);
 
     }
 
@@ -130,6 +156,7 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
         fBox.setOnCheckedChangeListener(null);
         rBox.setOnCheckedChangeListener(null);
         zb.setOnClickListener(null);
+        cb.setOnClickListener(null);
         super.onStop();
     }
 
@@ -176,6 +203,7 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
         }
         // else pass values to the sensorReadingView
         else {
+            prev = sensorReadingsView.lowPass(event.values.clone(),prev);
             sensorReadingsView.addValues(event.values.clone(), tv);
             sensorReadingsView.invalidate();
         }
