@@ -109,9 +109,9 @@ public class SensorReadingsView extends View{
             paint.setColor(Color.BLUE);
            // Log.d(TAG, "x: " + prev[0] + "\ty: " + prev[1] + "\tz: " + prev[2]);
            // Log.d(TAG, "0x: "+zeros[0]+"\t0y: "+zeros[1]+"\t0z: "+zeros[2]+"\n");
-            float circleX = prev[0] - zeros[0];
-            float circleY = prev[2] - zeros[2];
-            canvas.drawCircle(Math.abs(circleX)*5, Math.abs(circleY)*5, 10, paint);
+            float circleX = calculatedValues[0];
+            float circleY = calculatedValues[1];
+            canvas.drawCircle(Math.abs(circleX)*100, Math.abs(circleY)*100, 10, paint);
 
         }
 
@@ -127,7 +127,7 @@ public class SensorReadingsView extends View{
     }
 
     // Take in sensor reading values and apply filter if enabled
-    public void addValues(float[] vals, float[] calculatedValues, TextView tv){
+    public void addValues(float[] vals, float[] cV, TextView tv){
         /*
          * IMPORTANT: Stored values do not have the zero offset applied
          */
@@ -140,6 +140,8 @@ public class SensorReadingsView extends View{
         else
             prev = vals;
 
+        calculatedValues = cV;
+
         xs.add(prev[0]);
         ys.add(prev[1]);
         zs.add(prev[2]);
@@ -148,9 +150,9 @@ public class SensorReadingsView extends View{
         {
             String readingsText = String.format(" X: %.1f (%.1f) \n Y: %.1f (%.1f) \n Z: %.1f (%.1f) \n Angle: %.1f (%.1f)",
                     prev[0] - zeros[0],
-                    640*calculatedValues[0],
+                    100*calculatedValues[0],
                     prev[1] - zeros[1],
-                    480*calculatedValues[1],
+                    100*calculatedValues[1],
                     prev[2] - zeros[2],
                     0.0f,
                     Math.toDegrees(Math.atan((prev[1]-zeros[1])/(prev[0]-zeros[0]))),

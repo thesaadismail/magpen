@@ -46,6 +46,7 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
     private ArrayList<Float> zeroZ;
     private float[] prev;
     private float[] actualValues;
+    private float[] zeroes;
 
     //Listeners
     private CompoundButton.OnCheckedChangeListener filterListener;
@@ -126,19 +127,19 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
     @OnClick(R.id.calibrateTopLeftButton)
     public void calibrateTopLeft()
     {
-        topLeftMagPoint = new MagPoint(actualValues[0], actualValues[1], actualValues[2]);
+        topLeftMagPoint = new MagPoint(actualValues[0] - zeroes[0], actualValues[1]-zeroes[0], actualValues[2]-zeroes[0]);
     }
 
     @OnClick(R.id.calibrateTopRightButton)
     public void calibrateTopRight()
     {
-        topRightMagPoint = new MagPoint(actualValues[0], actualValues[1], actualValues[2]);
+        topRightMagPoint = new MagPoint(actualValues[0]-zeroes[0], actualValues[1]-zeroes[0], actualValues[2]-zeroes[0]);
     }
 
     @OnClick(R.id.calibrateBottomLeftButton)
     public void calibrateBottomLeft()
     {
-        bottomLeftMagPoint = new MagPoint(actualValues[0], actualValues[1], actualValues[2]);
+        bottomLeftMagPoint = new MagPoint(actualValues[0]-zeroes[0], actualValues[1]-zeroes[0], actualValues[2]-zeroes[0]);
     }
 
 
@@ -190,7 +191,7 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
                 float avgX = avgArray(zeroX);
                 float avgY = avgArray(zeroY);
                 float avgZ = avgArray(zeroZ);
-
+                zeroes = new MagPoint(avgX, avgY, avgZ).toFloatArray();
                 sensorReadingsView.setZeros(avgX, avgY, avgZ);
 
                 zeroX.clear();

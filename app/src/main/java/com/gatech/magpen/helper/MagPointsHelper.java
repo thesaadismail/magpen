@@ -1,5 +1,6 @@
 package com.gatech.magpen.helper;
 
+import android.graphics.Matrix;
 import android.util.Log;
 
 /**
@@ -10,11 +11,25 @@ public class MagPointsHelper {
     public static double singleEdgeInterpolation(float[] a, float[] b, float[] c)
     {
         float[] n = MatrixHelper.crossProduct(a, b);
-        float[] clinha = MatrixHelper.crossProduct(c, n);
+        n = MatrixHelper.divideMatrix(n, (float)MatrixHelper.frobeniusNorm(n));
+        float nDotC = MatrixHelper.dotProduct(n, c);
 
-        double cosAB = cosEntreVectores(a, b);
-        double cosAC = cosEntreVectores(a, clinha);
-        double cosBC = cosEntreVectores(b, clinha);
+        if(nDotC < 0)
+        {
+            return 0;
+        }
+
+        float[] nDotCTimesN = MatrixHelper.multiplyMatrix(n, nDotC);
+        float[] clinha = MatrixHelper.subtractMatrix(c, nDotCTimesN);
+
+        double cosAB = cosBetweenVectors(a, b);
+        double cosAC = cosBetweenVectors(a, clinha);
+        double cosBC = cosBetweenVectors(b, clinha);
+
+        if (!((cosAB >= -1 && cosAB <= 1) && (cosAC >= -1 && cosAC <= 1) && (cosBC >= -1 && cosBC <= 1)))
+        {
+            return 0;
+        }
 
         double angAB = Math.acos(cosAB);
         double angAC = Math.acos(cosAC);
@@ -42,7 +57,7 @@ public class MagPointsHelper {
         return points;
     }
 
-    public static double cosEntreVectores(float[] x, float[] y)
+    public static double cosBetweenVectors(float[] x, float[] y)
     {
         return MatrixHelper.dotProduct(x, y)/MatrixHelper.frobeniusNorm(x)/MatrixHelper.frobeniusNorm(y);
     }
