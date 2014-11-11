@@ -30,5 +30,8 @@ public class MagPoint {
         return new float[]{xPoint, yPoint, zPoint};
     }
 
+    public float magnitude(){
+        return (float)Math.sqrt(Math.pow(xPoint,2.0) + Math.pow(yPoint,2.0) + Math.pow(zPoint,2.0));
+    }
 
 }

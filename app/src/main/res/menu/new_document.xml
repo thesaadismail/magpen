@@ -7,4 +7,10 @@
         android:title="Magnet Input Off"
         app:showAsAction="always"
         android:orderInCategory="100" />
+    <item android:id="@+id/action_color_chooser"
+          android:icon="@drawable/ic_palette_white_24dp"
+          android:title="Color Chooser Off"
+          app:showAsAction="always"
+          android:orderInCategory="50"
+            />
 </menu>

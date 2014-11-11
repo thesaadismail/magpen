@@ -37,8 +37,8 @@ public class MagPenUtils {
         float xLoc = (float)((((Math.pow(d1,2)-Math.pow(d2,2)) + (Math.pow(i2,2)-Math.pow(i1,2)) + (Math.pow(j2,2)-Math.pow(j1,2))) * (2*j3-2*j2) - ((Math.pow(d2,2)-Math.pow(d3,2)) + (Math.pow(i3,2)-Math.pow(i2,2)) + (Math.pow(j3,2)-Math.pow(j2,2))) *(2*j2-2*j1) ) / ( (2*i2-2*i3)*(2*j2-2*j1)-(2*i1-2*i2)*(2*j3-2*j2 ) ));
         float yLoc = (float)(((Math.pow(d1,2)-Math.pow(d2,2)) + (Math.pow(i2,2)-Math.pow(i1,2)) + (Math.pow(j2,2)-Math.pow(j1,2)) + x*(2*i1-2*i2)) / (2*j2-2*j1));
 
-        float xPos = ((i1 - xLoc) / (i1 - bottomRight.xPoint)) * width;
-        float yPos = ((j1 - yLoc) / (j1 - bottomRight.yPoint)) * height;
+        float xPos = (float)Math.cbrt(((i1 - xLoc) / (i1 - bottomRight.xPoint))) * width;
+        float yPos = (float)Math.cbrt(((j1 - yLoc) / (j1 - bottomRight.yPoint))) * height;
 
         return new MagPoint(xPos, yPos, 0);
     }
@@ -49,6 +49,18 @@ public class MagPenUtils {
             out[i] = out[i] + ALPHA * (in[i]-out[i]);
         }
         return out;
+    }
+
+    public static float magnitude(MagPoint p){
+        return (float)Math.sqrt(Math.pow(p.xPoint,2.0) + Math.pow(p.yPoint,2.0) + Math.pow(p.zPoint,2.0));
+    }
+
+    public static float magnitude(float[] vals){
+        float sidesTotal = 0;
+        for(int i=0; i<vals.length; i++){
+            sidesTotal += Math.pow(vals[i],2.0);
+        }
+        return (float)Math.sqrt(sidesTotal);
     }
 
 }

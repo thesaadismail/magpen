@@ -67,6 +67,9 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
     private MagPoint bottomLeftMagPoint;
     private MagPoint bottomRightMagPoint;
 
+    private float colorMinValue;
+    private float colorMaxValue;
+
     private Menu actionBarMenu;
 
     //Misc
@@ -110,6 +113,7 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
         menu.clear();
         inflater.inflate(R.menu.new_document, menu);
         actionBarMenu = menu;
+        actionBarMenu.findItem(R.id.action_color_chooser).setVisible(false);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -130,6 +134,18 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
                 {
                     Toast.makeText(getActivity(),
                             "Cannot enable pen input till the magnetometer has been calibrated. ",
+                            Toast.LENGTH_LONG).show();
+                }
+                return true;
+            case R.id.action_color_chooser:
+                if(currentCalibrationState == CalibrationState.Done)
+                {
+
+                }
+                else
+                {
+                    Toast.makeText(getActivity(),
+                            "Magnetometer must be calibrated before the color chooser can be used. ",
                             Toast.LENGTH_LONG).show();
                 }
 
@@ -192,10 +208,12 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
             bottomRightMagPoint = new MagPoint(lastKnownMagValue.toFloatArray());
             currentCalibrationState = CalibrationState.Done;
             button.setText("Calibration is done. Tap again to restart calibration.");
+            colorMinValue = bottomRightMagPoint.magnitude();
+            colorMaxValue = topLeftMagPoint.magnitude();
+            actionBarMenu.findItem(R.id.action_color_chooser).setVisible(true);
         }
 
     }
-
 
     public void onAccuracyChanged(Sensor sensor, int accuracy) {  }
 
