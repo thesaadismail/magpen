@@ -7,4 +7,6 @@ import android.app.DialogFragment;
  */
 public class ColorPickerFragment extends DialogFragment {
 
+
+
 }
