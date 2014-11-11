@@ -17,4 +17,10 @@
         android:layout_weight="1"
         android:background="#FFFFFFFF" />
 
+    <Button
+        android:id="@+id/calibrationButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/beginCalibrationText"/>
+
 </LinearLayout>

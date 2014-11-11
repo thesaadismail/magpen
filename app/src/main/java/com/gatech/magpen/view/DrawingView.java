@@ -11,6 +11,8 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.view.MotionEvent;
 
+import com.gatech.magpen.helper.MagPoint;
+
 /**
  * Created by sismail on 11/2/14.
  */
@@ -89,16 +91,19 @@ public class DrawingView extends View {
     {
         drawCanvas.drawPath(drawPath, drawPaint);
         drawPath.reset();
+        invalidate();
     }
 
-    public void penDown(float x, float y)
+    public void penDown(MagPoint penLocation)
     {
-        drawPath.moveTo(x, y);
+        drawPath.moveTo(penLocation.xPoint, penLocation.yPoint);
+        invalidate();
     }
 
-    public void penMove(float x, float y)
+    public void penMove(MagPoint penLocation)
     {
-        drawPath.moveTo(x, y);
+        drawPath.lineTo(penLocation.xPoint, penLocation.yPoint);
+        invalidate();
     }
 
 }

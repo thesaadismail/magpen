@@ -14,17 +14,33 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.gatech.magpen.R;
+import com.gatech.magpen.helper.MagPoint;
+import com.gatech.magpen.util.MagPenUtils;
 import com.gatech.magpen.view.DrawingView;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnClick;
 
 /**
  * Created by sismail on 11/2/14.
  */
 public class NewDocumentFragment extends Fragment implements SensorEventListener {
+
+    private enum CalibrationState {
+        None,
+        TopLeft,
+        TopRight,
+        BottomLeft,
+        BottomRight,
+        Done
+    };
+
+    private CalibrationState currentCalibrationState;
 
     //Parent Activity
     private ActionBarActivity parentActivity;
@@ -33,13 +49,25 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
     @InjectView(R.id.newDocumentDrawingView)
     public DrawingView documentDrawingView;
 
+    @InjectView(R.id.calibrationButton)
+    public Button calibrationButton;
+
     //Sensors
     private SensorManager mSensorManager;
     private Sensor magnetometer;
 
     //Sensor Readings
-    private float lastKnownXValue;
-    private float lastKnownYValue;
+    //this value will be determined using the 4 corners
+    private MagPoint lastKnownPenValue;
+
+    //these value will be raw values from the magnetometer
+    private MagPoint lastKnownMagValue;
+    private MagPoint topLeftMagPoint;
+    private MagPoint topRightMagPoint;
+    private MagPoint bottomLeftMagPoint;
+    private MagPoint bottomRightMagPoint;
+
+    private Menu actionBarMenu;
 
     //Misc
     private boolean penInputEnabled;
@@ -49,6 +77,10 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
                              Bundle savedInstanceState) {
 
         parentActivity = (ActionBarActivity)getActivity();
+
+        lastKnownMagValue = new MagPoint(0,0,0);
+        lastKnownPenValue = new MagPoint(0,0,0);
+        currentCalibrationState = CalibrationState.None;
 
         View rootView = inflater.inflate(R.layout.fragment_new_document, container, false);
         ButterKnife.inject(this, rootView);
@@ -60,18 +92,12 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
         mSensorManager = (SensorManager)parentActivity.getSystemService(Context.SENSOR_SERVICE);
         magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
-        lastKnownXValue = 0;
-        lastKnownYValue = 0;
-
         return rootView;
     }
 
     public void onResume() {
         super.onResume();
-        if(penInputEnabled)
-        {
-            mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
-        }
+        mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
     }
 
     public void onPause() {
@@ -83,6 +109,7 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
         inflater.inflate(R.menu.new_document, menu);
+        actionBarMenu = menu;
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -94,24 +121,81 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
                 getFragmentManager().popBackStack();
                 return true;
             case R.id.action_magnet_input_toggle:
-                penInputEnabled = !penInputEnabled;
-                if(penInputEnabled)
+                if(currentCalibrationState == CalibrationState.Done)
                 {
-                    item.setIcon(R.drawable.ic_edit_white_24dp);
-                    mSensorManager.unregisterListener(this);
-                    mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
-                    documentDrawingView.penDown(lastKnownXValue, lastKnownYValue);
+                   togglePenInput(false);
+                   return true;
                 }
                 else
                 {
-                    item.setIcon(R.drawable.ic_edit_grey600_24dp);
-                    documentDrawingView.penUp();
+                    Toast.makeText(getActivity(),
+                            "Cannot enable pen input till the magnetometer has been calibrated. ",
+                            Toast.LENGTH_LONG).show();
                 }
-                return true;
+
         }
 
         return false;
     }
+
+    public void togglePenInput(boolean forceDisable)
+    {
+        MenuItem item = (MenuItem) actionBarMenu.findItem(R.id.action_magnet_input_toggle);
+
+        if(forceDisable)
+        {
+            penInputEnabled = false;
+        }
+        else
+        {
+            penInputEnabled = !penInputEnabled;
+        }
+
+
+        if(penInputEnabled)
+        {
+            item.setIcon(R.drawable.ic_edit_white_24dp);
+            documentDrawingView.penDown(lastKnownPenValue);
+        }
+        else
+        {
+            item.setIcon(R.drawable.ic_edit_grey600_24dp);
+            documentDrawingView.penUp();
+        }
+    }
+
+
+    @OnClick(R.id.calibrationButton)
+    public void calibrationButtonTapped(Button button)
+    {
+        if(currentCalibrationState == CalibrationState.None || currentCalibrationState == CalibrationState.Done) {
+            togglePenInput(true);
+            currentCalibrationState = CalibrationState.TopLeft;
+            button.setText("Calibrate Top Left Position");
+        }
+        else if(currentCalibrationState == CalibrationState.TopLeft) {
+            topLeftMagPoint = new MagPoint(lastKnownMagValue.toFloatArray());
+            currentCalibrationState = CalibrationState.TopRight;
+            button.setText("Calibrate Top Right Position");
+        }
+        else if(currentCalibrationState == CalibrationState.TopRight) {
+            topRightMagPoint = new MagPoint(lastKnownMagValue.toFloatArray());
+            currentCalibrationState = CalibrationState.BottomLeft;
+            button.setText("Calibrate Bottom Left Position");
+        }
+        else if(currentCalibrationState == CalibrationState.BottomLeft) {
+            bottomLeftMagPoint = new MagPoint(lastKnownMagValue.toFloatArray());
+            currentCalibrationState = CalibrationState.BottomRight;
+            button.setText("Calibrate Bottom Right Position");
+        }
+        else if(currentCalibrationState == CalibrationState.BottomRight) {
+            bottomRightMagPoint = new MagPoint(lastKnownMagValue.toFloatArray());
+            currentCalibrationState = CalibrationState.Done;
+            button.setText("Calibration is done. Tap again to restart calibration.");
+        }
+
+    }
+
 
     public void onAccuracyChanged(Sensor sensor, int accuracy) {  }
 
@@ -121,11 +205,23 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
         if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
         {
             mGeomagnetic = event.values;
-            lastKnownXValue = mGeomagnetic[0];
-            lastKnownYValue = mGeomagnetic[1];
-            if(penInputEnabled)
+
+            float[] previousValues = lastKnownMagValue.toFloatArray();
+            previousValues = MagPenUtils.lowPass(mGeomagnetic, previousValues);
+
+            lastKnownMagValue.xPoint = previousValues[0];
+            lastKnownMagValue.yPoint = previousValues[1];
+
+            if(currentCalibrationState == CalibrationState.Done)
             {
-                documentDrawingView.penMove(lastKnownXValue, lastKnownYValue);
+                lastKnownPenValue = MagPenUtils.retrieveMagPoint(topLeftMagPoint, topRightMagPoint,
+                        bottomLeftMagPoint, bottomRightMagPoint, lastKnownMagValue,
+                        documentDrawingView.getWidth(), documentDrawingView.getHeight());
+
+                if(penInputEnabled)
+                {
+                    documentDrawingView.penMove(lastKnownPenValue);
+                }
             }
         }
 
