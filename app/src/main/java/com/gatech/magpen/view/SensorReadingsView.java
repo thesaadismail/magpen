@@ -108,36 +108,36 @@ public class SensorReadingsView extends View{
             if(calibrationState > 3){
                 paint.setColor(Color.BLUE);
 
-//                float xLoc1 = (topLeft[0] - prev[0]) / (topLeft[0] - topRight[0]);
-//                float xLoc2 = (bottomLeft[0] - prev[0]) / (bottomLeft[0] - bottomRight[0]);
-//                float xLoc = (float)width * ((xLoc1 + xLoc2)/2.0f);
+                float xLoc1 = (topLeft[0] - prev[0]) / (topLeft[0] - topRight[0]);
+                float xLoc2 = (bottomLeft[0] - prev[0]) / (bottomLeft[0] - bottomRight[0]);
+                float xLoc = (float)width * ((xLoc1 + xLoc2)/2.0f);
+
+                float yLoc1 = (topLeft[1] - prev[1]) / (topLeft[1] - bottomLeft[1]);
+                float yLoc2 = (topRight[1] - prev[1]) / (topRight[1] - bottomRight[1]);
+                float yLoc = (float)height * ((yLoc1 + yLoc2)/2.0f);
+
+                canvas.drawCircle(xLoc, yLoc, 10, paint);
+
+//                float i1 = topLeft[0];
+//                float i2 = topRight[0];
+//                float i3 = bottomLeft[0];
+//                float j1 = topLeft[1];
+//                float j2 = topRight[1];
+//                float j3 = bottomLeft[1];
+//                float x = prev[0];
+//                float y = prev[1];
 //
-//                float yLoc1 = (topLeft[1] - prev[1]) / (topLeft[1] - bottomLeft[1]);
-//                float yLoc2 = (topRight[1] - prev[1]) / (topRight[1] - bottomRight[1]);
-//                float yLoc = (float)height * ((yLoc1 + yLoc2)/2.0f);
+//                float d1 = (float)Math.sqrt(Math.pow(prev[0]-topLeft[0],2) + Math.pow(prev[1] - topLeft[1],2));
+//                float d2 = (float)Math.sqrt(Math.pow(prev[0]-topRight[0],2) + Math.pow(prev[1] - topRight[1],2));
+//                float d3 = (float)Math.sqrt(Math.pow(prev[0]-bottomLeft[0],2) + Math.pow(prev[1] - bottomLeft[1],2));
 //
-//                canvas.drawCircle(xLoc, yLoc, 10, paint);
-
-                float i1 = topLeft[0];
-                float i2 = topRight[0];
-                float i3 = bottomLeft[0];
-                float j1 = topLeft[1];
-                float j2 = topRight[1];
-                float j3 = bottomLeft[1];
-                float x = prev[0];
-                float y = prev[1];
-
-                float d1 = (float)Math.sqrt(Math.pow(prev[0]-topLeft[0],2) + Math.pow(prev[1] - topLeft[1],2));
-                float d2 = (float)Math.sqrt(Math.pow(prev[0]-topRight[0],2) + Math.pow(prev[1] - topRight[1],2));
-                float d3 = (float)Math.sqrt(Math.pow(prev[0]-bottomLeft[0],2) + Math.pow(prev[1] - bottomLeft[1],2));
-
-                float xLoc = (float)((((Math.pow(d1,2)-Math.pow(d2,2)) + (Math.pow(i2,2)-Math.pow(i1,2)) + (Math.pow(j2,2)-Math.pow(j1,2))) * (2*j3-2*j2) - ((Math.pow(d2,2)-Math.pow(d3,2)) + (Math.pow(i3,2)-Math.pow(i2,2)) + (Math.pow(j3,2)-Math.pow(j2,2))) *(2*j2-2*j1) ) / ( (2*i2-2*i3)*(2*j2-2*j1)-(2*i1-2*i2)*(2*j3-2*j2 ) ));
-                float yLoc = (float)((Math.pow(d1,2)-Math.pow(d2,2)) + (Math.pow(i2,2)-Math.pow(i1,2)) + (Math.pow(j2,2)-Math.pow(j1,2)) + x*(2*i1-2*i2)) / (2*j2-2*j1);
-
-                float xPos = ((topLeft[0] - xLoc) / (topLeft[0] - bottomRight[0])) * width;
-                float yPos = ((topLeft[1] - yLoc) / (topLeft[1] - bottomRight[1])) * height;
-
-                canvas.drawCircle(xPos, yPos, 10, paint);
+//                float xLoc = (float)((((Math.pow(d1,2)-Math.pow(d2,2)) + (Math.pow(i2,2)-Math.pow(i1,2)) + (Math.pow(j2,2)-Math.pow(j1,2))) * (2*j3-2*j2) - ((Math.pow(d2,2)-Math.pow(d3,2)) + (Math.pow(i3,2)-Math.pow(i2,2)) + (Math.pow(j3,2)-Math.pow(j2,2))) *(2*j2-2*j1) ) / ( (2*i2-2*i3)*(2*j2-2*j1)-(2*i1-2*i2)*(2*j3-2*j2 ) ));
+//                float yLoc = (float)(((Math.pow(d1,2)-Math.pow(d2,2)) + (Math.pow(i2,2)-Math.pow(i1,2)) + (Math.pow(j2,2)-Math.pow(j1,2)) + x*(2*i1-2*i2)) / (2*j2-2*j1));
+//
+//                float xPos = ((topLeft[0] - xLoc) / (topLeft[0] - bottomRight[0])) * width;
+//                float yPos = ((topLeft[1] - yLoc) / (topLeft[1] - bottomRight[1])) * height;
+//
+//                canvas.drawCircle(xPos, yPos, 10, paint);
 
             }
 
