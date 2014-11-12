@@ -263,6 +263,7 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
 
     }
 
+    // Callback from dialog (confirm selected)
     @Override
     public void onDialogPositiveClick(DialogFragment dialog){
         documentDrawingView.getDrawPaint().setColor(((ColorPickerFragment) dialog).getColor());
@@ -272,6 +273,7 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
         choosingColor = false;
     }
 
+    // Callback from dialog (Cancel selected)
     @Override
     public void onDialogNegativeClick(DialogFragment dialog){
         Toast.makeText(getActivity(),

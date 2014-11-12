@@ -19,19 +19,26 @@ import com.gatech.magpen.view.ColorPickerView;
  */
 public class ColorPickerFragment extends DialogFragment {
 
+    // Interface for dialog callbacks
     public interface ColorPickerListener {
         public void onDialogPositiveClick(DialogFragment dialog);
         public void onDialogNegativeClick(DialogFragment dialog);
     }
 
+    // Listener Instance
     private ColorPickerListener mListener;
+
+    // View Instance
     ColorPickerView colorPickerView;
 
+    // Current Color Value
     private float currentColorValue;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Make sure calling fragment uses the listener interface
         try{
             mListener = (ColorPickerListener) getTargetFragment();
         } catch (ClassCastException e) {
@@ -48,28 +55,33 @@ public class ColorPickerFragment extends DialogFragment {
         ButterKnife.inject(this, rootView);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage("message")
+        builder.setMessage("Stroke Color")
+                // Confirm selected
                 .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mListener.onDialogPositiveClick(ColorPickerFragment.this);
                     }
                 })
+                // Cancel selected
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mListener.onDialogNegativeClick(ColorPickerFragment.this);
                     }
                 })
+                // Set Color Picker View as the content
                 .setView(rootView);
         colorPickerView = (ColorPickerView) rootView.findViewById(R.id.color_picker);
         return builder.create();
     }
 
+    // Return color int
     public int getColor() {
         return convertValueToColor(currentColorValue);
     }
 
+    // convert color value(0-100) into color int (0-red 100-blue)
     private int convertValueToColor(float val){
         float red,green,blue;
 
@@ -88,6 +100,7 @@ public class ColorPickerFragment extends DialogFragment {
 
     }
 
+    // SETTER (also sets value in ColorPickerView)
     public void setCurrentColorValue(float value) {
         currentColorValue = value;
         if(colorPickerView != null) {
