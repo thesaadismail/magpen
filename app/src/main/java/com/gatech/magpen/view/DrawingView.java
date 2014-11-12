@@ -106,4 +106,8 @@ public class DrawingView extends View {
         invalidate();
     }
 
+    public Paint getDrawPaint() {
+        return drawPaint;
+    }
+
 }

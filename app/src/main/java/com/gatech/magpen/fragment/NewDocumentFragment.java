@@ -1,5 +1,6 @@
 package com.gatech.magpen.fragment;
 
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.Context;
 import android.hardware.Sensor;
@@ -29,7 +30,7 @@ import butterknife.OnClick;
 /**
  * Created by sismail on 11/2/14.
  */
-public class NewDocumentFragment extends Fragment implements SensorEventListener {
+public class NewDocumentFragment extends Fragment implements SensorEventListener, ColorPickerFragment.ColorPickerListener {
 
     private enum CalibrationState {
         None,
@@ -67,8 +68,11 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
     private MagPoint bottomLeftMagPoint;
     private MagPoint bottomRightMagPoint;
 
+    // Color Picker Dialog
+    private ColorPickerFragment colorPickerDialog;
     private float colorMinValue;
     private float colorMaxValue;
+    private boolean choosingColor;
 
     private Menu actionBarMenu;
 
@@ -94,6 +98,10 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
 
         mSensorManager = (SensorManager)parentActivity.getSystemService(Context.SENSOR_SERVICE);
         magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+        colorPickerDialog = new ColorPickerFragment();
+        colorPickerDialog.setTargetFragment(this,0);
+        choosingColor = false;
 
         return rootView;
     }
@@ -140,7 +148,8 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
             case R.id.action_color_chooser:
                 if(currentCalibrationState == CalibrationState.Done)
                 {
-
+                    colorPickerDialog.show(getFragmentManager(),"dialog");
+                    choosingColor = true;
                 }
                 else
                 {
@@ -236,13 +245,39 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
                         bottomLeftMagPoint, bottomRightMagPoint, lastKnownMagValue,
                         documentDrawingView.getWidth(), documentDrawingView.getHeight());
 
-                if(penInputEnabled)
+                if(choosingColor){
+                    float colorValue = 100.0f - ((lastKnownMagValue.magnitude() - colorMinValue) / (colorMaxValue - colorMinValue)) * 100.0f;
+                    if(colorValue > 100.0f)
+                        colorValue = 100.0f;
+                    else if(colorValue < 1.0f)
+                        colorValue = 1.0f;
+                    colorPickerDialog.setCurrentColorValue(colorValue);
+                }
+
+                else if(penInputEnabled)
                 {
                     documentDrawingView.penMove(lastKnownPenValue);
                 }
             }
         }
 
+    }
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog){
+        documentDrawingView.getDrawPaint().setColor(((ColorPickerFragment) dialog).getColor());
+        Toast.makeText(getActivity(),
+                "Paint Color Set",
+                Toast.LENGTH_LONG).show();
+        choosingColor = false;
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog){
+        Toast.makeText(getActivity(),
+                "Color Picker Canceled",
+                Toast.LENGTH_LONG).show();
+        choosingColor = false;
     }
 
 }
