@@ -27,7 +27,7 @@ public class StrokeWidthView extends View {
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(3);
 
-        canvas.drawRect(getWidth()*.2f,getHeight()*.2f,getWidth()*.8f,getHeight()*.8f,paint);
+        //canvas.drawRect(getWidth()*.2f,getHeight()*.2f,getWidth()*.8f,getHeight()*.8f,paint);
 
         paint.setColor(color);
         paint.setStyle(Paint.Style.FILL);
@@ -35,7 +35,10 @@ public class StrokeWidthView extends View {
         float start = getWidth()*.2f;
         float end = getWidth()*.8f;
         float width = end-start;
-        canvas.drawCircle(start + ((float)progress/100.0f)*width,getHeight()/2.0f,convertValueToWidth(progress)*3,paint);
+        //canvas.drawCircle(start + ((float)progress/100.0f)*width,getHeight()/2.0f,convertValueT,oWidth(progress)*3,paint);
+        for(int i = 0; i <= progress*4; i++){
+            canvas.drawCircle(start + (float)i/400.0f * width,getHeight()/2.0f,convertValueToWidth((float)i/4.0f)*5,paint);
+        }
 
 
     }
@@ -50,7 +53,7 @@ public class StrokeWidthView extends View {
         if(val > 100) return 100.0f;
         if(val < 0) return 0.0f;
 
-        return 3.0f + 7.0f * (val/100.0f);
+        return 3.0f + 20.0f * (val/100.0f);
 
     }
 

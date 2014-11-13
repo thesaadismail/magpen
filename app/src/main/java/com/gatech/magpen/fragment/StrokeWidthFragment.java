@@ -76,7 +76,7 @@ public class StrokeWidthFragment extends DialogFragment {
         if(val > 100) return 100.0f;
         if(val < 0) return 0.0f;
 
-        return 3.0f + 7.0f * (val/100.0f);
+        return 3.0f + 20.0f * (val/100.0f);
 
     }
 

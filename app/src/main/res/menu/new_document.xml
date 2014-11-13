@@ -8,9 +8,13 @@
         app:showAsAction="always"
         android:orderInCategory="100" />
     <item android:id="@+id/action_color_chooser"
-          android:icon="@drawable/ic_palette_white_24dp"
-          android:title="Color Chooser Off"
-          app:showAsAction="always"
-          android:orderInCategory="50"
-            />
+        android:icon="@drawable/ic_palette_white_24dp"
+        android:title="Color Chooser Off"
+        app:showAsAction="always"
+        android:orderInCategory="50" />
+    <item android:id="@+id/action_stroke_chooser"
+        android:icon="@drawable/ic_brush_white_24dp"
+        android:title="Stroke Chooser Off"
+        app:showAsAction="always"
+        android:orderInCategory="25" />
 </menu>
