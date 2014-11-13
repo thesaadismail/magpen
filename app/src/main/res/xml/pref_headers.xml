@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <header
+        android:fragment="${packageName}.${activityClass}$GeneralPreferenceFragment"
+        android:title="@string/pref_header_general" />
+    <header
+        android:fragment="${packageName}.${activityClass}$InterpolationPreferenceFragment"
+        android:title="@string/pref_header_interpolation" />
+</PreferenceScreen>

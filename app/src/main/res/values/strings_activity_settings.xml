@@ -1,0 +1,23 @@
+<resources>
+        <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+    <string name="pref_header_interpolation">Interpolation Algorithm</string>
+
+    <string name="pref_title_interpolation">Algorithm Type</string>
+
+    <string-array name="pref_interpolation_algorithm_list">
+        <item>Four Screen Corners</item>
+        <item>Trilateration</item>
+        <item>Projection on Planes</item>
+    </string-array>
+    <string-array name="pref_interpolation_algorithm_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+</resources>

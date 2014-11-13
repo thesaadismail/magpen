@@ -1,0 +1,15 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
+         dismiss it. -->
+    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
+    <ListPreference
+        android:key="pref_interpolation_algorithm_type"
+        android:title="@string/pref_title_interpolation"
+        android:entries="@array/pref_interpolation_algorithm_list"
+        android:entryValues="@array/pref_interpolation_algorithm_values"
+        android:defaultValue="180"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+
+</PreferenceScreen>
