@@ -1,5 +1,6 @@
 package com.gatech.magpen.activity;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 
 import android.app.FragmentTransaction;
@@ -45,6 +46,8 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
             return true;
         }
         else if(id == R.id.action_viewSensorReadings){

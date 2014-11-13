@@ -3,11 +3,13 @@ package com.gatech.magpen.fragment;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -247,7 +249,10 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
 
             if(currentCalibrationState == CalibrationState.Done)
             {
-                lastKnownPenValue = MagPenUtils.retrieveMagPoint(topLeftMagPoint, topRightMagPoint,
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(parentActivity);
+                int algoTypeSetting = Integer.parseInt(prefs.getString("pref_interpolation_algorithm_type", "0"));
+
+                lastKnownPenValue = MagPenUtils.retrieveMagPoint(algoTypeSetting, topLeftMagPoint, topRightMagPoint,
                         bottomLeftMagPoint, bottomRightMagPoint, lastKnownMagValue,
                         documentDrawingView.getWidth(), documentDrawingView.getHeight());
 
