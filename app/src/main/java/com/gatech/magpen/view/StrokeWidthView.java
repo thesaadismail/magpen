@@ -1,0 +1,57 @@
+package com.gatech.magpen.view;
+
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.util.AttributeSet;
+import android.view.View;
+
+/**
+ * Created by Brent on 11/13/2014.
+ */
+public class StrokeWidthView extends View {
+
+    private int progress;
+    private int color = 0xFF660000;
+
+    public StrokeWidthView(Context context, AttributeSet attrs){
+        super(context,attrs);
+        progress = 100;
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas){
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(3);
+
+        canvas.drawRect(getWidth()*.2f,getHeight()*.2f,getWidth()*.8f,getHeight()*.8f,paint);
+
+        paint.setColor(color);
+        paint.setStyle(Paint.Style.FILL);
+
+        float start = getWidth()*.2f;
+        float end = getWidth()*.8f;
+        float width = end-start;
+        canvas.drawCircle(start + ((float)progress/100.0f)*width,getHeight()/2.0f,convertValueToWidth(progress)*3,paint);
+
+
+    }
+
+    public void setProgress(int progress,int color){
+        this.progress = progress;
+        this.color = color;
+    }
+
+    private float convertValueToWidth(float val){
+
+        if(val > 100) return 100.0f;
+        if(val < 0) return 0.0f;
+
+        return 3.0f + 7.0f * (val/100.0f);
+
+    }
+
+}

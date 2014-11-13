@@ -109,36 +109,59 @@ public class SensorReadingsView extends View{
             if(calibrationState > 3){
                 paint.setColor(Color.BLUE);
 
-                float[] newTopRight = new float[3];
-                newTopRight[0] = topLeft[0] - topRight[0];
-                newTopRight[1] = topLeft[1] - topRight[1];
-                newTopRight[2] = topLeft[2] - topRight[2];
-
-                float [] newBottomLeft = new float[3];
-                newBottomLeft[0] = topLeft[0] - bottomLeft[0];
-                newBottomLeft[1] = topLeft[1] - bottomLeft[1];
-                newBottomLeft[2] = topLeft[2] - bottomLeft[2];
-
-                float scaleX = MagPenUtils.magnitude(newTopRight) / (topRight[0] - topLeft[0]);
-                float deltaX = -scaleX*topLeft[0];
-
-                float scaleY = MagPenUtils.magnitude(newBottomLeft) / (bottomLeft[1] - topLeft[1]);
-                float deltaY = -scaleY*topLeft[1];
-
-                float xLoc = (prev[0] * scaleX + deltaX) / MagPenUtils.magnitude(newTopRight) * width;
-                float yLoc = (prev[1] * scaleY + deltaY) / MagPenUtils.magnitude(newBottomLeft) * height;
-
-                canvas.drawCircle(xLoc,yLoc,10,paint);
-
-//                float xLoc1 = (topLeft[0] - prev[0]) / (topLeft[0] - topRight[0]);
-//                float xLoc2 = (bottomLeft[0] - prev[0]) / (bottomLeft[0] - bottomRight[0]);
-//                float xLoc = (float)width * ((xLoc1 + xLoc2)/2.0f);
+//                float[] diagVector = new float[] {topLeft[0]-bottomRight[0],topLeft[1]-bottomRight[1],topLeft[2]-bottomRight[2]};
+//                float diagMagnitude = MagPenUtils.magnitude(diagVector);
 //
-//                float yLoc1 = (topLeft[1] - prev[1]) / (topLeft[1] - bottomLeft[1]);
-//                float yLoc2 = (topRight[1] - prev[1]) / (topRight[1] - bottomRight[1]);
-//                float yLoc = (float)height * ((yLoc1 + yLoc2)/2.0f);
+//                float[] currentVector = new float[] {topLeft[0]-prev[0],topLeft[1]-prev[1],topLeft[2]-prev[2]};
+//                float currentMagnitude = MagPenUtils.magnitude(currentVector);
 //
-//                canvas.drawCircle(xLoc, yLoc, 10, paint);
+//                float scale = currentMagnitude / diagMagnitude;
+//
+//                float angle = (float)Math.acos(dotProduct(currentVector,diagVector)/(diagMagnitude*currentMagnitude));
+//
+//                float screenAngle = (float)Math.atan(height/width);
+//
+//                float currentAngle = screenAngle + angle;
+//
+//                float xLoc = (float)(scale * Math.cos(currentAngle))*width;
+//                float yLoc = (float)(scale * Math.sin(currentAngle))*height;
+//
+//                canvas.drawCircle(xLoc,yLoc,10,paint);
+
+
+
+
+
+//                float[] newTopRight = new float[3];
+//                newTopRight[0] = topLeft[0] - topRight[0];
+//                newTopRight[1] = topLeft[1] - topRight[1];
+//                newTopRight[2] = topLeft[2] - topRight[2];
+//
+//                float [] newBottomLeft = new float[3];
+//                newBottomLeft[0] = topLeft[0] - bottomLeft[0];
+//                newBottomLeft[1] = topLeft[1] - bottomLeft[1];
+//                newBottomLeft[2] = topLeft[2] - bottomLeft[2];
+//
+//                float scaleX = MagPenUtils.magnitude(newTopRight) / (topRight[0] - topLeft[0]);
+//                float deltaX = -scaleX*topLeft[0];
+//
+//                float scaleY = MagPenUtils.magnitude(newBottomLeft) / (bottomLeft[1] - topLeft[1]);
+//                float deltaY = -scaleY*topLeft[1];
+//
+//                float xLoc = (prev[0] * scaleX + deltaX) / MagPenUtils.magnitude(newTopRight) * width;
+//                float yLoc = (prev[1] * scaleY + deltaY) / MagPenUtils.magnitude(newBottomLeft) * height;
+//
+//                canvas.drawCircle(xLoc,yLoc,10,paint);
+
+                float xLoc1 = (topLeft[0] - prev[0]) / (topLeft[0] - topRight[0]);
+                float xLoc2 = (bottomLeft[0] - prev[0]) / (bottomLeft[0] - bottomRight[0]);
+                float xLoc = (float)width * ((xLoc1 + xLoc2)/2.0f);
+
+                float yLoc1 = (topLeft[1] - prev[1]) / (topLeft[1] - bottomLeft[1]);
+                float yLoc2 = (topRight[1] - prev[1]) / (topRight[1] - bottomRight[1]);
+                float yLoc = (float)height * ((yLoc1 + yLoc2)/2.0f);
+
+                canvas.drawCircle(xLoc, yLoc, 10, paint);
 
 //                float i1 = topLeft[0];
 //                float i2 = topRight[0];
@@ -240,6 +263,10 @@ public class SensorReadingsView extends View{
             default:
                 break;
         }
+    }
+
+    public static float dotProduct(float[] x, float[] y) {
+        return (x[0] * y[0])+(x[1] * y[1])+(x[2] * y[2]);
     }
 
 }

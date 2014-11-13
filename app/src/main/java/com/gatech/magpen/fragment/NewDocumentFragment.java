@@ -30,7 +30,7 @@ import butterknife.OnClick;
 /**
  * Created by sismail on 11/2/14.
  */
-public class NewDocumentFragment extends Fragment implements SensorEventListener, ColorPickerFragment.ColorPickerListener {
+public class NewDocumentFragment extends Fragment implements SensorEventListener, ColorPickerFragment.ColorPickerListener,StrokeWidthFragment.StrokeWidthListener {
 
     private enum CalibrationState {
         None,
@@ -73,6 +73,9 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
     private float colorMinValue;
     private float colorMaxValue;
     private boolean choosingColor;
+    private int currentColor = 0xFF660000;
+
+    private StrokeWidthFragment strokeWidthDialog;
 
     private Menu actionBarMenu;
 
@@ -102,6 +105,9 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
         colorPickerDialog = new ColorPickerFragment();
         colorPickerDialog.setTargetFragment(this,0);
         choosingColor = false;
+
+        strokeWidthDialog = new StrokeWidthFragment();
+        strokeWidthDialog.setTargetFragment(this,0);
 
         return rootView;
     }
@@ -148,8 +154,8 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
             case R.id.action_color_chooser:
                 if(currentCalibrationState == CalibrationState.Done)
                 {
-                    colorPickerDialog.show(getFragmentManager(),"dialog");
-                    choosingColor = true;
+                    strokeWidthDialog.show(getFragmentManager(),"dialog");
+                    //choosingColor = true;
                 }
                 else
                 {
@@ -263,23 +269,38 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
 
     }
 
-    // Callback from dialog (confirm selected)
+    // Callback from Color Picker dialog (confirm selected)
     @Override
     public void onDialogPositiveClick(DialogFragment dialog){
         documentDrawingView.getDrawPaint().setColor(((ColorPickerFragment) dialog).getColor());
+        currentColor = ((ColorPickerFragment) dialog).getColor();
         Toast.makeText(getActivity(),
                 "Paint Color Set",
                 Toast.LENGTH_LONG).show();
         choosingColor = false;
     }
 
-    // Callback from dialog (Cancel selected)
+    // Callback from Color Picker dialog (Cancel selected)
     @Override
     public void onDialogNegativeClick(DialogFragment dialog){
         Toast.makeText(getActivity(),
                 "Color Picker Canceled",
                 Toast.LENGTH_LONG).show();
         choosingColor = false;
+    }
+
+    @Override
+    public void onStrokePositiveClick(DialogFragment dialog){
+        Toast.makeText(getActivity(),
+                "Paint Color Set",
+                Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onStrokeNegativeClick(DialogFragment dialog){
+        Toast.makeText(getActivity(),
+                "Color Picker Canceled",
+                Toast.LENGTH_LONG).show();
     }
 
 }
