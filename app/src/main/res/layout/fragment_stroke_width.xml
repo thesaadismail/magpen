@@ -5,7 +5,7 @@
 
     <view
         android:layout_width="wrap_content"
-        android:layout_height="100dp"
+        android:layout_height="180dp"
         class="com.gatech.magpen.view.StrokeWidthView"
         android:id="@+id/stroke_width"
         android:layout_gravity="center" />

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -17,6 +18,8 @@ public class ColorPickerView extends View {
 
     // Paint settings
     private Paint paint;
+
+    private Rect bounds = new Rect();
 
     // CONSTRUCTOR
     public ColorPickerView(Context context, AttributeSet attrs){
@@ -37,8 +40,23 @@ public class ColorPickerView extends View {
     protected void onDraw(Canvas canvas){
         float start = getWidth()*.1f;
         float end = getWidth()*.9f;
-        float top = getHeight()*.3f;
-        float bottom = getHeight()*.7f;
+        float top = getHeight()*.46f;
+        float bottom = getHeight()*.80f;
+
+        paint.setColor(Color.rgb(8,81,156));
+        paint.setStyle(Paint.Style.FILL);
+
+        canvas.drawRect(0,0,getWidth(),getHeight()/4.0f,paint);
+
+        String title = "Stroke Width";
+
+        paint.setTextSize(72);
+        float textWidth = paint.measureText(title);
+        paint.getTextBounds(title,0,title.length(),bounds);
+        float textHeight = bounds.height();
+
+        paint.setColor(Color.WHITE);
+        canvas.drawText(title,getWidth()*.5f - textWidth/2.0f,getHeight()/8.0f + textHeight/2.0f,paint);
 
         // Draw the color palette
         for(int i = 0; i <= 100; i++){

@@ -3,6 +3,7 @@ package com.gatech.magpen.fragment;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
@@ -49,8 +50,8 @@ public class StrokeWidthFragment extends DialogFragment {
         View rootView = getActivity().getLayoutInflater().inflate(R.layout.fragment_stroke_width,null,false);
         ButterKnife.inject(this, rootView);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage("Stroke Width")
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),android.R.style.Theme_Holo_Light_Panel);
+        builder//.setMessage("Stroke Width")
                 // Confirm selected
                 .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
@@ -58,14 +59,14 @@ public class StrokeWidthFragment extends DialogFragment {
                         mListener.onStrokePositiveClick(StrokeWidthFragment.this);
                     }
                 })
-                        // Cancel selected
+                // Cancel selected
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         mListener.onStrokeNegativeClick(StrokeWidthFragment.this);
                     }
                 })
-                        // Set Color Picker View as the content
+                // Set Color Picker View as the content
                 .setView(rootView);
         strokeWidthView = (StrokeWidthView) rootView.findViewById(R.id.stroke_width);
         return builder.create();

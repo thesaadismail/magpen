@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -14,6 +15,8 @@ public class StrokeWidthView extends View {
 
     private int progress;
     private int color = 0xFF660000;
+
+    private Rect bounds = new Rect();
 
     public StrokeWidthView(Context context, AttributeSet attrs){
         super(context,attrs);
@@ -29,6 +32,22 @@ public class StrokeWidthView extends View {
 
         //canvas.drawRect(getWidth()*.2f,getHeight()*.2f,getWidth()*.8f,getHeight()*.8f,paint);
 
+        paint.setColor(Color.rgb(8,81,156));
+        paint.setStyle(Paint.Style.FILL);
+
+        canvas.drawRect(0,0,getWidth(),getHeight()/4.0f,paint);
+
+        String title = "Stroke Width";
+
+        paint.setTextSize(72);
+        float textWidth = paint.measureText(title);
+        paint.getTextBounds(title,0,title.length(),bounds);
+        float textHeight = bounds.height();
+
+        paint.setColor(Color.WHITE);
+        canvas.drawText(title,getWidth()*.5f - textWidth/2.0f,getHeight()/8.0f + textHeight/2.0f,paint);
+
+
         paint.setColor(color);
         paint.setStyle(Paint.Style.FILL);
 
@@ -37,9 +56,8 @@ public class StrokeWidthView extends View {
         float width = end-start;
         //canvas.drawCircle(start + ((float)progress/100.0f)*width,getHeight()/2.0f,convertValueT,oWidth(progress)*3,paint);
         for(int i = 0; i <= progress*4; i++){
-            canvas.drawCircle(start + (float)i/400.0f * width,getHeight()/2.0f,convertValueToWidth((float)i/4.0f)*5,paint);
+            canvas.drawCircle(start + (float)i/400.0f * width,getHeight()*2.0f/3.0f,convertValueToWidth((float)i/4.0f)*5,paint);
         }
-
 
     }
 
