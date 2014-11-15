@@ -103,7 +103,7 @@ public class MagPenUtils {
         return (float)Math.sqrt(sidesTotal);
     }
 
-    public static boolean runClickDetection(List<MagPoint> magPointList)
+    public static boolean runDoubleClickDetection(List<MagPoint> magPointList)
     {
         float[] sortedMagPointMagnitudes = new float[magPointList.size()];
         for (int i = 0; i<magPointList.size(); i++)
@@ -138,10 +138,14 @@ public class MagPenUtils {
         String patternStr = patternBuilder.toString();
 
         Pattern p = Pattern.compile("BA+B");
-        Matcher m = p.matcher(patternStr);
+        Matcher matcher = p.matcher(patternStr);
 
-        //Log.d(" Pattern: ", patternStr);
-        if(m.find())
+        int count = 0;
+        while (matcher.find())
+            count++;
+
+        Log.d(" Pattern: ", patternStr);
+        if(count == 2)
         {
             Log.d("Click Detection Pattern", "average: "+average+
                     " click-detected-magnitude:"+clickDetectedMagnitude+" Pattern: "+patternStr);

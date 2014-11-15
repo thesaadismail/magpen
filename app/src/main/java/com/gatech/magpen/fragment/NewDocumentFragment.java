@@ -282,11 +282,12 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
             {
                 previousMagPointsBuffer.remove();
                 previousMagPointsBuffer.add(new MagPoint(lastKnownMagValue.toFloatArray()));
-                boolean clickDetected = MagPenUtils.runClickDetection((List)previousMagPointsBuffer);
+                boolean doubleClickDetected = MagPenUtils.runDoubleClickDetection((List)previousMagPointsBuffer);
 
-                if(clickDetected)
+                if(doubleClickDetected)
                 {
-                    Toast.makeText(parentActivity, "Click Detected", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(parentActivity, "Double Click Detected", Toast.LENGTH_SHORT).show();
+                    togglePenInput(false);
                     previousMagPointsBuffer.clear();
                 }
             }
@@ -294,9 +295,6 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
             {
                 previousMagPointsBuffer.add(new MagPoint(lastKnownMagValue.toFloatArray()));
             }
-
-
-
 
             if(currentCalibrationState == CalibrationState.Done)
             {
