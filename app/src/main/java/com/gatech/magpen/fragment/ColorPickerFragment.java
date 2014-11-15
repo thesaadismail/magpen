@@ -52,8 +52,8 @@ public class ColorPickerFragment extends DialogFragment {
         View rootView = getActivity().getLayoutInflater().inflate(R.layout.fragment_color_picker,null,false);
         ButterKnife.inject(this, rootView);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage("Stroke Color")
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),android.R.style.Theme_Holo_Light_Panel);
+        builder//.setMessage("Stroke Color")
                 // Confirm selected
                 .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
