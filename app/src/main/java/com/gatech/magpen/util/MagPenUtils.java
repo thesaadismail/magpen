@@ -144,7 +144,7 @@ public class MagPenUtils {
         while (matcher.find())
             count++;
 
-        Log.d(" Pattern: ", patternStr);
+        //Log.d(" Pattern: ", patternStr);
         if(count == 2)
         {
             Log.d("Click Detection Pattern", "average: "+average+
