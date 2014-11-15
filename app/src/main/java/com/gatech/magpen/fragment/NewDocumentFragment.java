@@ -25,6 +25,10 @@ import com.gatech.magpen.helper.MagPoint;
 import com.gatech.magpen.util.MagPenUtils;
 import com.gatech.magpen.view.DrawingView;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
@@ -69,6 +73,8 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
     private MagPoint topRightMagPoint;
     private MagPoint bottomLeftMagPoint;
     private MagPoint bottomRightMagPoint;
+    //private float baselineIntensity;
+    private Queue<MagPoint> previousMagPointsBuffer;
 
     // Color Picker Dialog
     private ColorPickerFragment colorPickerDialog;
@@ -89,6 +95,7 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
 
         lastKnownMagValue = new MagPoint(0,0,0);
         lastKnownPenValue = new MagPoint(0,0,0);
+        previousMagPointsBuffer = new LinkedList<MagPoint>();
         currentCalibrationState = CalibrationState.None;
 
         View rootView = inflater.inflate(R.layout.fragment_new_document, container, false);
@@ -240,6 +247,26 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
 
             lastKnownMagValue.xPoint = previousValues[0];
             lastKnownMagValue.yPoint = previousValues[1];
+
+            if(previousMagPointsBuffer.size() == 15)
+            {
+                previousMagPointsBuffer.remove();
+                previousMagPointsBuffer.add(new MagPoint(lastKnownMagValue.toFloatArray()));
+                boolean clickDetected = MagPenUtils.runClickDetection((List)previousMagPointsBuffer);
+
+                if(clickDetected)
+                {
+                    Toast.makeText(parentActivity, "Click Detected", Toast.LENGTH_SHORT).show();
+                    previousMagPointsBuffer.clear();
+                }
+            }
+            else
+            {
+                previousMagPointsBuffer.add(new MagPoint(lastKnownMagValue.toFloatArray()));
+            }
+
+
+
 
             if(currentCalibrationState == CalibrationState.Done)
             {

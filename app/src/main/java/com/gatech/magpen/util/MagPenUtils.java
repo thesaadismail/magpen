@@ -2,8 +2,14 @@ package com.gatech.magpen.util;
 
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.gatech.magpen.helper.MagPoint;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by sismail on 11/10/14.
@@ -96,5 +102,95 @@ public class MagPenUtils {
         }
         return (float)Math.sqrt(sidesTotal);
     }
+
+    public static boolean runClickDetection(List<MagPoint> magPointList)
+    {
+        float[] sortedMagPointMagnitudes = new float[magPointList.size()];
+        for (int i = 0; i<magPointList.size(); i++)
+        {
+            sortedMagPointMagnitudes[i] = MagPenUtils.magnitude(magPointList.get(i));
+        }
+        Arrays.sort(sortedMagPointMagnitudes);
+
+        float average = mean(sortedMagPointMagnitudes);
+        float median = median(sortedMagPointMagnitudes);
+        float maxVal = sortedMagPointMagnitudes[sortedMagPointMagnitudes.length-1];
+        float minVal = sortedMagPointMagnitudes[0];
+
+        StringBuilder patternBuilder = new StringBuilder();
+        float clickDetectedMagnitude = 0;
+        float THRESHOLD = 3;
+
+        for(MagPoint point : magPointList)
+        {
+            float pointMagnitude = MagPenUtils.magnitude(point);
+            if(pointMagnitude <= average+THRESHOLD && pointMagnitude >= average-THRESHOLD)
+            {
+                patternBuilder.append("B");
+            }
+            else
+            {
+                clickDetectedMagnitude = pointMagnitude;
+                patternBuilder.append("A");
+            }
+        }
+
+        String patternStr = patternBuilder.toString();
+
+        Pattern p = Pattern.compile("BA+B");
+        Matcher m = p.matcher(patternStr);
+
+        //Log.d(" Pattern: ", patternStr);
+        if(m.find())
+        {
+            Log.d("Click Detection Pattern", "average: "+average+
+                    " click-detected-magnitude:"+clickDetectedMagnitude+" Pattern: "+patternStr);
+            return true;
+        }
+
+        return false;
+    }
+
+    public static float mean(float[] m) {
+        float sum = 0;
+        for (int i = 0; i < m.length; i++) {
+            sum += m[i];
+        }
+        return sum / m.length;
+    }
+
+    public static float median(float[] m) {
+        int middle = m.length/2;
+        if (m.length%2 == 1) {
+            return m[middle];
+        } else {
+            return (float)((m[middle-1] + m[middle]) / 2.0);
+        }
+    }
+
+    public static float maxVal (float[] numbers) {
+
+        float highest = numbers[0];
+        for (int index = 1; index < numbers.length; index ++) {
+            if (numbers[index] > highest) {
+                highest = numbers [index];
+            }
+        }
+
+        return highest;
+    }
+
+    public static float minVal (float[] numbers) {
+
+        float lowest = numbers[0];
+        for (int index = 1; index < numbers.length; index ++) {
+            if (numbers[index] < lowest) {
+                lowest = numbers [index];
+            }
+        }
+
+        return lowest;
+    }
+
 
 }

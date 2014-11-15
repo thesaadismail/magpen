@@ -165,8 +165,8 @@ public class SensorReadingsView extends View{
             tv.setText("X: " + Float.toString(prev[0] - zeros[0]) + "\n" +
                             "Y: " + Float.toString(prev[1] - zeros[1]) + "\n" +
                             "Z: " + Float.toString(prev[2] - zeros[2]) + "\n" +
-                            "Angle: " + Double.toString(Math.toDegrees(Math.atan((prev[1]-zeros[1])/(prev[0]-zeros[0]))))
-            );
+                            "Intensity: " + Math.sqrt(Math.pow(prev[0]-zeros[0], 2)+Math.pow(prev[1]-zeros[1], 2)+Math.pow(prev[2]-zeros[2], 2)));
+
 
     }
 

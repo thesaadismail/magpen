@@ -72,7 +72,7 @@ public class DrawingView extends View {
                 drawPath.moveTo(touchX, touchY);
                 break;
             case MotionEvent.ACTION_MOVE:
-                Log.d(TAG, touchX + " " + touchY);
+                //Log.d(TAG, touchX + " " + touchY);
                 drawPath.lineTo(touchX, touchY);
                 break;
             case MotionEvent.ACTION_UP:
