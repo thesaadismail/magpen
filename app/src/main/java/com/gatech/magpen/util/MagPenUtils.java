@@ -206,9 +206,9 @@ public class MagPenUtils {
         while (matcher.find())
             count++;
 
-        Log.d("Click Detection Pattern", " numOfClicks:"+count+" Pattern: "+patternStr);
         if(count > 0)
         {
+            Log.d("Click Detection Pattern", " numOfClicks:"+count+" Pattern: "+patternStr);
         }
 
         return count;
@@ -216,7 +216,7 @@ public class MagPenUtils {
 
     public static boolean runSingleClickDetection(List<MagPoint> magPointList)
     {
-        int numOfClicks = detectNumberOfClicksNew(magPointList, 10f);
+        int numOfClicks = detectNumberOfClicksNew(magPointList, 7);
 
         //Log.d(" Pattern: ", patternStr);
         if(numOfClicks > 0)
