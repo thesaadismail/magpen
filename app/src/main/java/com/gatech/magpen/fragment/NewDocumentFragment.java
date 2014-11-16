@@ -263,6 +263,7 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
 
     }
 
+    private boolean initialThrowAway = false;
     public void onAccuracyChanged(Sensor sensor, int accuracy) {  }
 
     public void onSensorChanged(SensorEvent event) {
@@ -277,23 +278,40 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
 
             lastKnownMagValue.xPoint = previousValues[0];
             lastKnownMagValue.yPoint = previousValues[1];
+            lastKnownMagValue.zPoint = previousValues[2];
 
-            if(previousMagPointsBuffer.size() == 15)
+            if(previousMagPointsBuffer.size() == 10)
             {
+
                 previousMagPointsBuffer.remove();
-                previousMagPointsBuffer.add(new MagPoint(lastKnownMagValue.toFloatArray()));
+                previousMagPointsBuffer.add(new MagPoint(event.values));
+
+                boolean singleClickDetected = false;//MagPenUtils.runSingleClickDetection((List)previousMagPointsBuffer);
                 boolean doubleClickDetected = MagPenUtils.runDoubleClickDetection((List)previousMagPointsBuffer);
 
                 if(doubleClickDetected)
                 {
-                    Toast.makeText(parentActivity, "Double Click Detected", Toast.LENGTH_SHORT).show();
+                    if(penInputEnabled)
+                    {
+                        Toast.makeText(parentActivity, "Disabling Pen Input", Toast.LENGTH_SHORT).show();
+                    }
+                    else
+                    {
+                        Toast.makeText(parentActivity, "Enabling Pen Input", Toast.LENGTH_SHORT).show();
+                    }
+                    togglePenInput(false);
+                    previousMagPointsBuffer.clear();
+                }
+                else if(singleClickDetected)
+                {
+                    Toast.makeText(parentActivity, "Single Click Detected", Toast.LENGTH_SHORT).show();
                     togglePenInput(false);
                     previousMagPointsBuffer.clear();
                 }
             }
             else
             {
-                previousMagPointsBuffer.add(new MagPoint(lastKnownMagValue.toFloatArray()));
+                previousMagPointsBuffer.add(new MagPoint(event.values));
             }
 
             if(currentCalibrationState == CalibrationState.Done)

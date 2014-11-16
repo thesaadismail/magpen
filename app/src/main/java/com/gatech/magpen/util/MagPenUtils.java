@@ -103,7 +103,7 @@ public class MagPenUtils {
         return (float)Math.sqrt(sidesTotal);
     }
 
-    public static boolean runDoubleClickDetection(List<MagPoint> magPointList)
+    public static int detectNumberOfClicks(List<MagPoint> magPointList, float THRESHOLD)
     {
         float[] sortedMagPointMagnitudes = new float[magPointList.size()];
         for (int i = 0; i<magPointList.size(); i++)
@@ -119,7 +119,6 @@ public class MagPenUtils {
 
         StringBuilder patternBuilder = new StringBuilder();
         float clickDetectedMagnitude = 0;
-        float THRESHOLD = 3;
 
         for(MagPoint point : magPointList)
         {
@@ -140,20 +139,107 @@ public class MagPenUtils {
         Pattern p = Pattern.compile("BA+B");
         Matcher matcher = p.matcher(patternStr);
 
+
+        Pattern p2 = Pattern.compile("B+A+B+A+");
+        Matcher matcher2 = p.matcher(patternStr);
+
+        Pattern p3 = Pattern.compile("A+B+A+B+");
+        Matcher matcher3 = p.matcher(patternStr);
+
         int count = 0;
         while (matcher.find())
             count++;
 
-        //Log.d(" Pattern: ", patternStr);
-        if(count == 2)
+        while (matcher2.find())
+            count++;
+
+        while (matcher3.find())
+            count++;
+
+
+        Log.d("Click Detection Pattern", "average: "+average+
+                " numOfClicks:"+count+" Pattern: "+patternStr);
+        if(count > 0)
         {
-            Log.d("Click Detection Pattern", "average: "+average+
-                    " click-detected-magnitude:"+clickDetectedMagnitude+" Pattern: "+patternStr);
+        }
+
+        return count;
+    }
+
+    public static int detectNumberOfClicksNew(List<MagPoint> magPointList, float THRESHOLD)
+    {
+        float[] magPointMagnitudes = new float[magPointList.size()];
+        float[] magPointDifferences = new float[magPointList.size()-1];
+        for (int i = 0; i<magPointList.size(); i++)
+        {
+            magPointMagnitudes[i] = MagPenUtils.magnitude(magPointList.get(i));
+        }
+
+        for (int i = 1; i<magPointList.size(); i++)
+        {
+            magPointDifferences[i-1] = Math.abs(magPointMagnitudes[i]-magPointMagnitudes[i-1]);
+        }
+        //magPointDifferences[magPointDifferences.length-1] = 0;
+
+        StringBuilder patternBuilder = new StringBuilder();
+        float clickDetectedMagnitude = 0;
+
+        for(float pointDifference : magPointDifferences)
+        {
+            if(pointDifference <= THRESHOLD)
+            {
+                patternBuilder.append("B");
+            }
+            else
+            {
+                clickDetectedMagnitude = pointDifference;
+                patternBuilder.append("A");
+            }
+        }
+
+        String patternStr = patternBuilder.toString();
+
+        Pattern p = Pattern.compile("BA+B");
+        Matcher matcher = p.matcher(patternStr);
+
+        int count = 0;
+        while (matcher.find())
+            count++;
+
+        Log.d("Click Detection Pattern", " numOfClicks:"+count+" Pattern: "+patternStr);
+        if(count > 0)
+        {
+        }
+
+        return count;
+    }
+
+    public static boolean runSingleClickDetection(List<MagPoint> magPointList)
+    {
+        int numOfClicks = detectNumberOfClicksNew(magPointList, 10f);
+
+        //Log.d(" Pattern: ", patternStr);
+        if(numOfClicks > 0)
+        {
             return true;
         }
 
         return false;
     }
+
+    public static boolean runDoubleClickDetection(List<MagPoint> magPointList)
+    {
+        int numOfClicks = detectNumberOfClicksNew(magPointList, 7);
+
+        //Log.d(" Pattern: ", patternStr);
+        if(numOfClicks == 2)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
 
     public static float mean(float[] m) {
         float sum = 0;
