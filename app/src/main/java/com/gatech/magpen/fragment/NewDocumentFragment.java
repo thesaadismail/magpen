@@ -286,6 +286,7 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
                 previousMagPointsBuffer.remove();
                 previousMagPointsBuffer.add(new MagPoint(event.values));
 
+                //single click is disabled
                 boolean singleClickDetected = false;//MagPenUtils.runSingleClickDetection((List)previousMagPointsBuffer);
                 boolean doubleClickDetected = MagPenUtils.runDoubleClickDetection((List)previousMagPointsBuffer);
 
