@@ -48,7 +48,7 @@ public class ColorPickerView extends View {
 
         canvas.drawRect(0,0,getWidth(),getHeight()/4.0f,paint);
 
-        String title = "Stroke Width";
+        String title = "Stroke Color";
 
         paint.setTextSize(72);
         float textWidth = paint.measureText(title);
