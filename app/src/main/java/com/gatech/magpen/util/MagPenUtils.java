@@ -27,7 +27,10 @@ public class MagPenUtils {
         if(algoType == 0)
         {
             //4 corners algorithm
-            float xLoc1 = (topLeft.xPoint - actualPointer.xPoint) / (topLeft.xPoint - topRight.xPoint);
+            //float xRatio = (topLeft.xPoint - actualPointer.xPoint) / (topLeft.xPoint - bottomRight.xPoint);
+            //float yRatio = Math.abs((topLeft.yPoint - actualPointer.yPoint) / (topLeft.yPoint - bottomRight.yPoint));
+
+            float xLoc1 = ((topLeft.xPoint - actualPointer.xPoint) / (topLeft.xPoint - topRight.xPoint));
             float xLoc2 = (bottomLeft.xPoint - actualPointer.xPoint) / (bottomLeft.xPoint - bottomRight.xPoint);
             xPos = width * ((xLoc1 + xLoc2)/2.0f);
 
@@ -60,24 +63,48 @@ public class MagPenUtils {
         else if(algoType == 2)
         {
             //projection on planes
-                float[] newTopRight = new float[3];
-                newTopRight[0] = topLeft.xPoint - topRight.xPoint;
-                newTopRight[1] = topLeft.yPoint - topRight.yPoint;
-                newTopRight[2] = topLeft.zPoint - topRight.zPoint;
+//            float[] newTopRight = new float[3];
+//            newTopRight[0] = topLeft.xPoint - topRight.xPoint;
+//            newTopRight[1] = topLeft.yPoint - topRight.yPoint;
+//            newTopRight[2] = topLeft.zPoint - topRight.zPoint;
+//
+//            float [] newBottomLeft = new float[3];
+//            newBottomLeft[0] = topLeft.xPoint - bottomLeft.xPoint;
+//            newBottomLeft[1] = topLeft.yPoint - bottomLeft.yPoint;
+//            newBottomLeft[2] = topLeft.zPoint - bottomLeft.zPoint;
+//
+//            float scaleX = MagPenUtils.magnitude(newTopRight) / (topRight.xPoint - topLeft.xPoint);
+//            float deltaX = -scaleX*topLeft.xPoint;
+//
+//            float scaleY = MagPenUtils.magnitude(newBottomLeft) / (bottomLeft.yPoint - topLeft.yPoint);
+//            float deltaY = -scaleY*topLeft.yPoint;
+//
+//            xPos = (actualPointer.xPoint * scaleX + deltaX) / MagPenUtils.magnitude(newTopRight) * width;
+//            yPos = (actualPointer.yPoint * scaleY + deltaY) / MagPenUtils.magnitude(newBottomLeft) * height;
 
-                float [] newBottomLeft = new float[3];
-                newBottomLeft[0] = topLeft.xPoint - bottomLeft.xPoint;
-                newBottomLeft[1] = topLeft.yPoint - bottomLeft.yPoint;
-                newBottomLeft[2] = topLeft.zPoint - bottomLeft.zPoint;
+            float theta = (float)Math.atan((topRight.yPoint - topLeft.yPoint)/(topLeft.xPoint - topRight.xPoint));
 
-                float scaleX = MagPenUtils.magnitude(newTopRight) / (topRight.xPoint - topLeft.xPoint);
-                float deltaX = -scaleX*topLeft.xPoint;
+            float y3 = (float)(bottomRight.xPoint * Math.sin(theta) + bottomRight.yPoint * Math.cos(theta));
+            float y2 = (float)(topRight.xPoint * Math.sin(theta) + topRight.yPoint * Math.cos(theta));
+            float x3 = (float)(bottomRight.xPoint * Math.cos(theta) - bottomRight.yPoint * Math.sin(theta));
+            float x1 = (float)(topLeft.xPoint * Math.cos(theta) - topLeft.yPoint * Math.sin(theta));
 
-                float scaleY = MagPenUtils.magnitude(newBottomLeft) / (bottomLeft.yPoint - topLeft.yPoint);
-                float deltaY = -scaleY*topLeft.yPoint;
+            float a = 1.0f/(x3-x1);
+            float b = 1.0f/(y3-y2);
+            float i = 1.0f - a*bottomRight.xPoint;
+            float j = 1.0f - b*bottomRight.yPoint;
 
-                xPos = (actualPointer.xPoint * scaleX + deltaX) / MagPenUtils.magnitude(newTopRight) * width;
-                yPos = (actualPointer.yPoint * scaleY + deltaY) / MagPenUtils.magnitude(newBottomLeft) * height;
+            float newX = (float)(actualPointer.xPoint * Math.cos(theta) - actualPointer.yPoint * Math.sin(theta));
+            float newY = (float)(actualPointer.xPoint * Math.sin(theta) + actualPointer.yPoint * Math.cos(theta));
+
+            float xRatio = (a*newX + i);
+            float yRatio = (b*newY + j);
+            float xLoc = xRatio * width;
+            float yLoc = yRatio * height;
+
+            xPos = xLoc;
+            yPos = yLoc;
+
         }
 
         return new MagPoint(xPos, yPos, 0);

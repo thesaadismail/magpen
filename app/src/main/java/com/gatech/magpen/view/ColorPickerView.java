@@ -50,7 +50,7 @@ public class ColorPickerView extends View {
 
         String title = "Stroke Color";
 
-        paint.setTextSize(72);
+        paint.setTextSize(getHeight()/4.0f*.5f);
         float textWidth = paint.measureText(title);
         paint.getTextBounds(title,0,title.length(),bounds);
         float textHeight = bounds.height();
