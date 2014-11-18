@@ -12,6 +12,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -41,6 +42,9 @@ public class MainFragment extends Fragment {
 
     @InjectView(R.id.magpen_gallery)
     public LinearLayout magpenGallery;
+
+    @InjectView(R.id.magpen_selected_drawing)
+    public FrameLayout magpenSelectedDrawing;
 
 
     @Override
@@ -76,6 +80,7 @@ public class MainFragment extends Fragment {
         if(files.length > 0)
         {
             magpenGalleryScrollView.setVisibility(View.VISIBLE);
+            magpenSelectedDrawing.setVisibility(View.VISIBLE);
             documentsListEmptyTextView.setVisibility(View.GONE);
             for (File file : files)
             {
@@ -85,19 +90,8 @@ public class MainFragment extends Fragment {
         else
         {
             magpenGalleryScrollView.setVisibility(View.GONE);
+            magpenSelectedDrawing.setVisibility(View.GONE);
             documentsListEmptyTextView.setVisibility(View.VISIBLE);
-        }
-    }
-
-    class CreateNewDocumentOnClickListener implements View.OnClickListener
-    {
-        @Override
-        public void onClick(View v) {
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.replace(R.id.container, new NewDocumentFragment());
-            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-            ft.addToBackStack(null);
-            ft.commit();
         }
     }
 
@@ -121,10 +115,11 @@ public class MainFragment extends Fragment {
         layout.setLayoutParams(new LinearLayout.LayoutParams(250, 250));
         layout.setGravity(Gravity.CENTER);
 
-        ImageView imageView = new ImageView(getActivity());
+        final ImageView imageView = new ImageView(getActivity());
         imageView.setLayoutParams(new ViewGroup.LayoutParams(220, 220));
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         imageView.setImageBitmap(bm);
+        imageView.setOnClickListener(new DrawingSelectedOnClickListener(path));
 
         layout.addView(imageView);
         return layout;
@@ -148,9 +143,7 @@ public class MainFragment extends Fragment {
         return bm;
     }
 
-    public int calculateInSampleSize(
-
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+    public int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
         // Raw height and width of image
         final int height = options.outHeight;
         final int width = options.outWidth;
@@ -166,5 +159,49 @@ public class MainFragment extends Fragment {
 
         return inSampleSize;
     }
+
+    class CreateNewDocumentOnClickListener implements View.OnClickListener
+    {
+        @Override
+        public void onClick(View v) {
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.replace(R.id.container, new NewDocumentFragment());
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+            ft.addToBackStack(null);
+            ft.commit();
+        }
+    }
+    class DrawingSelectedOnClickListener implements View.OnClickListener
+    {
+        String imagePath;
+
+        public DrawingSelectedOnClickListener(String path)
+        {
+            imagePath = path;
+        }
+
+        public void onClick(View v)
+        {
+            magpenSelectedDrawing.removeAllViews();
+
+            final BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            Bitmap bmBounds = BitmapFactory.decodeFile(imagePath, options);
+
+            Bitmap bm = decodeSampledBitmapFromUri(imagePath, options.outWidth,
+                    options.outHeight);
+
+            final ImageView imageView = new ImageView(getActivity());
+            imageView.setLayoutParams(new ViewGroup.LayoutParams(options.outWidth,
+                    options.outHeight));
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            imageView.setImageBitmap(bm);
+
+            magpenSelectedDrawing.addView(imageView);
+            magpenSelectedDrawing.invalidate();
+
+        }
+    }
+
 
 }

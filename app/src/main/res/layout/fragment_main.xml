@@ -21,16 +21,30 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 
-    <HorizontalScrollView
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/magpen_gallery_scrollview"
-        android:visibility="gone">
-        <LinearLayout
-            android:id="@+id/magpen_gallery"
-            android:layout_width="wrap_content"
+        android:orientation="vertical">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/magpen_gallery_scrollview"
+            android:visibility="gone">
+            <LinearLayout
+                android:id="@+id/magpen_gallery"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                />
+        </HorizontalScrollView>
+
+        <FrameLayout
+            android:id="@+id/magpen_selected_drawing"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            />
-    </HorizontalScrollView>
+            android:visibility="gone"/>
+
+    </LinearLayout>
 </RelativeLayout>
