@@ -2,10 +2,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity" >
-    <item android:id="@+id/action_enterVirtualWorld"
+    <!--<item android:id="@+id/action_enterVirtualWorld"
         android:title="@string/action_enterVirtualWorld"
         android:orderInCategory="100"
-        app:showAsAction="never" />
+        app:showAsAction="never" />-->
     <item android:id="@+id/action_viewSensorReadings"
         android:title="@string/action_viewSensorReadings"
         android:orderInCategory="100"
