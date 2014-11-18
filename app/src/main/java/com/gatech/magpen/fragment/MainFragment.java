@@ -37,7 +37,7 @@ public class MainFragment extends Fragment {
     public TextView documentsListEmptyTextView;
 
     @InjectView(R.id.magpen_gallery_scrollview)
-    public ScrollView magpenGalleryScrollView;
+    public HorizontalScrollView magpenGalleryScrollView;
 
     @InjectView(R.id.magpen_gallery)
     public LinearLayout magpenGallery;
