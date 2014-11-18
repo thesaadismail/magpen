@@ -110,4 +110,14 @@ public class DrawingView extends View {
         return drawPaint;
     }
 
+    public Bitmap getBitmap()
+    {
+        this.setDrawingCacheEnabled(true);
+        this.buildDrawingCache();
+        Bitmap bmp = Bitmap.createBitmap(this.getDrawingCache());
+        this.setDrawingCacheEnabled(false);
+
+        return bmp;
+    }
+
 }

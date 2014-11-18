@@ -4,11 +4,17 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
@@ -25,6 +31,13 @@ import com.gatech.magpen.helper.MagPoint;
 import com.gatech.magpen.util.MagPenUtils;
 import com.gatech.magpen.view.DrawingView;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -152,6 +165,10 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
                 // app icon in action bar clicked; goto parent activity.
                 getFragmentManager().popBackStack();
                 return true;
+            case R.id.action_save_drawing:
+                saveDrawing();
+                getFragmentManager().popBackStack();
+                return true;
             case R.id.action_magnet_input_toggle:
                 if(currentCalibrationState == CalibrationState.Done)
                 {
@@ -197,6 +214,66 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
         }
 
         return false;
+    }
+
+    public void saveDrawing() {
+        File folder = new File(Environment.getExternalStorageDirectory().toString());
+        boolean success = false;
+        if (!folder.exists()) {
+            success = folder.mkdirs();
+        }
+
+        System.out.println(success + "folder");
+
+        String currentDateandTime = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss").format(new Date());
+
+        File file = new File(getActivity().getFileStreamPath("magpen-drawing-"+currentDateandTime+".png")
+                .getPath());
+
+        if (!file.exists()) {
+            try {
+                success = file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println(success + "file");
+
+        FileOutputStream ostream = null;
+        try
+        {
+            ostream = new FileOutputStream(file);
+
+            System.out.println(ostream);
+
+            Bitmap well = documentDrawingView.getBitmap();
+            Bitmap save = Bitmap.createBitmap(well.getWidth(), well.getHeight(), Bitmap.Config.ARGB_8888);
+            Paint paint = new Paint();
+            paint.setColor(Color.WHITE);
+            Canvas now = new Canvas(save);
+            now.drawRect(new Rect(0, 0, well.getWidth(), well.getHeight()), paint);
+            now.drawBitmap(well,
+                    new Rect(0, 0, well.getWidth(), well.getHeight()),
+                    new Rect(0, 0, well.getWidth(), well.getHeight()), null);
+;
+            if (save == null) {
+                System.out.println("NULL bitmap save\n");
+            }
+            save.compress(Bitmap.CompressFormat.PNG, 100, ostream);
+
+
+
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            Toast.makeText(getActivity(), "Null error", Toast.LENGTH_SHORT).show();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Toast.makeText(getActivity(), "File error", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(getActivity(), "IO error", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void togglePenInput(boolean forceDisable)

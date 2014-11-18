@@ -2,6 +2,10 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/action_save_drawing"
+        android:icon="@drawable/ic_save_white_24dp"
+        android:title="Save Off"
+        app:showAsAction="always" />
     <item android:id="@+id/action_magnet_input_toggle"
         android:icon="@drawable/ic_edit_grey600_24dp"
         android:title="Magnet Input Off"

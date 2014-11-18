@@ -21,6 +21,9 @@
             android:name="android.hardware.sensor.magnetometer"
             android:required="true" />
 
+        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
         <activity
             android:name=".activity.SettingsActivity"
             android:label="@string/title_activity_settings" >
