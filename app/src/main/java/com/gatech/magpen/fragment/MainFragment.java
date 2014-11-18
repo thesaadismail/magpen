@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -16,9 +15,7 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.gatech.magpen.R;
 import com.gatech.magpen.view.FloatingActionButton;
@@ -84,7 +81,7 @@ public class MainFragment extends Fragment {
             documentsListEmptyTextView.setVisibility(View.GONE);
             for (File file : files)
             {
-                magpenGallery.addView(insertPhoto(file.getAbsolutePath()));
+                magpenGallery.addView(createLayoutForPhoto(file.getAbsolutePath()));
             }
         }
         else
@@ -108,14 +105,14 @@ public class MainFragment extends Fragment {
         fabButton.setVisibility(View.GONE);
     }
 
-    View insertPhoto(String path){
-        Bitmap bm = decodeSampledBitmapFromUri(path, 220, 220);
+    View createLayoutForPhoto(String path){
+        Bitmap bm = retrieveScaledBitmap(path, 220, 220);
 
         LinearLayout layout = new LinearLayout(getActivity());
         layout.setLayoutParams(new LinearLayout.LayoutParams(250, 250));
         layout.setGravity(Gravity.CENTER);
 
-        final ImageView imageView = new ImageView(getActivity());
+        ImageView imageView = new ImageView(getActivity());
         imageView.setLayoutParams(new ViewGroup.LayoutParams(220, 220));
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         imageView.setImageBitmap(bm);
@@ -125,39 +122,40 @@ public class MainFragment extends Fragment {
         return layout;
     }
 
-    public Bitmap decodeSampledBitmapFromUri(String path, int reqWidth, int reqHeight) {
-        Bitmap bm = null;
-
-        // First decode with inJustDecodeBounds=true to check dimensions
+    public Bitmap retrieveScaledBitmap(String path, int reqWidth, int reqHeight) {
+        //decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(path, options);
 
         // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+        options.inSampleSize = calculateScaledSize(options, reqWidth, reqHeight);
 
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
-        bm = BitmapFactory.decodeFile(path, options);
+        Bitmap bitmap = BitmapFactory.decodeFile(path, options);
 
-        return bm;
+        return bitmap;
     }
 
-    public int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
+    public int calculateScaledSize(BitmapFactory.Options options, int requiredWidth, int requiredHeight) {
+        // raw height and width of bitmap images
         final int height = options.outHeight;
         final int width = options.outWidth;
-        int inSampleSize = 1;
+        int scaledSize = 1;
 
-        if (height > reqHeight || width > reqWidth) {
-            if (width > height) {
-                inSampleSize = Math.round((float)height / (float)reqHeight);
-            } else {
-                inSampleSize = Math.round((float)width / (float)reqWidth);
+        if (height > requiredHeight || width > requiredWidth) {
+            if (width > height)
+            {
+                scaledSize = Math.round((float)height / (float)requiredHeight);
+            }
+            else
+            {
+                scaledSize = Math.round((float)width / (float)requiredWidth);
             }
         }
 
-        return inSampleSize;
+        return scaledSize;
     }
 
     class CreateNewDocumentOnClickListener implements View.OnClickListener
@@ -184,13 +182,16 @@ public class MainFragment extends Fragment {
         {
             magpenSelectedDrawing.removeAllViews();
 
+            //get actual bitmap size
             final BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             Bitmap bmBounds = BitmapFactory.decodeFile(imagePath, options);
 
-            Bitmap bm = decodeSampledBitmapFromUri(imagePath, options.outWidth,
+            //send the bitmap size to decoding sampled bitmap from Uri
+            Bitmap bm = retrieveScaledBitmap(imagePath, options.outWidth,
                     options.outHeight);
 
+            //save the bitmap in an image view
             final ImageView imageView = new ImageView(getActivity());
             imageView.setLayoutParams(new ViewGroup.LayoutParams(options.outWidth,
                     options.outHeight));

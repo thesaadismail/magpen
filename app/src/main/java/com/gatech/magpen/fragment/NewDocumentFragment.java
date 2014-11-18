@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -217,14 +218,7 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
     }
 
     public void saveDrawing() {
-        File folder = new File(Environment.getExternalStorageDirectory().toString());
         boolean success = false;
-        if (!folder.exists()) {
-            success = folder.mkdirs();
-        }
-
-        System.out.println(success + "folder");
-
         String currentDateandTime = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss").format(new Date());
 
         File file = new File(getActivity().getFileStreamPath("magpen-drawing-"+currentDateandTime+".png")
@@ -238,41 +232,49 @@ public class NewDocumentFragment extends Fragment implements SensorEventListener
             }
         }
 
-        System.out.println(success + "file");
-
-        FileOutputStream ostream = null;
+        FileOutputStream outputStream = null;
         try
         {
-            ostream = new FileOutputStream(file);
+            outputStream = new FileOutputStream(file);
 
-            System.out.println(ostream);
+            System.out.println(outputStream);
 
-            Bitmap well = documentDrawingView.getBitmap();
-            Bitmap save = Bitmap.createBitmap(well.getWidth(), well.getHeight(), Bitmap.Config.ARGB_8888);
+            Bitmap drawingViewBitmap = documentDrawingView.getBitmap();
+            Bitmap bitmapToBeSaved = Bitmap.createBitmap(drawingViewBitmap.getWidth(),
+                    drawingViewBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+
             Paint paint = new Paint();
             paint.setColor(Color.WHITE);
-            Canvas now = new Canvas(save);
-            now.drawRect(new Rect(0, 0, well.getWidth(), well.getHeight()), paint);
-            now.drawBitmap(well,
-                    new Rect(0, 0, well.getWidth(), well.getHeight()),
-                    new Rect(0, 0, well.getWidth(), well.getHeight()), null);
+            Canvas currentCanvas = new Canvas(bitmapToBeSaved);
+
+            //draw white rectangle in the background
+            currentCanvas.drawRect(new Rect(0, 0, drawingViewBitmap.getWidth(),
+                    drawingViewBitmap.getHeight()), paint);
+
+            //draw the actual bitmap on the canvas
+            currentCanvas.drawBitmap(drawingViewBitmap,
+                    new Rect(0, 0, drawingViewBitmap.getWidth(), drawingViewBitmap.getHeight()),
+                    new Rect(0, 0, drawingViewBitmap.getWidth(), drawingViewBitmap.getHeight()), null);
 ;
-            if (save == null) {
-                System.out.println("NULL bitmap save\n");
+
+            //error checking
+            if (bitmapToBeSaved == null)
+            {
+                Log.d("NewDocument", "bitMapToBeSavedIsNull");
             }
-            save.compress(Bitmap.CompressFormat.PNG, 100, ostream);
 
-
+            //save bitmap to the file
+            bitmapToBeSaved.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
 
         } catch (NullPointerException e) {
             e.printStackTrace();
-            Toast.makeText(getActivity(), "Null error", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "NullPointerException", Toast.LENGTH_SHORT).show();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            Toast.makeText(getActivity(), "File error", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "FileNotFoundException", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(getActivity(), "IO error", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "IOException", Toast.LENGTH_SHORT).show();
         }
     }
 
