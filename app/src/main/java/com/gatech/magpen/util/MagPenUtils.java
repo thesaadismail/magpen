@@ -16,8 +16,10 @@ import java.util.regex.Pattern;
  */
 public class MagPenUtils {
 
+    // Percentage change allowance for low-pass filter
     private static float ALPHA = 0.1f;
 
+    // Calculate Point
     public static MagPoint retrieveMagPoint(int algoType,
                                             MagPoint topLeft, MagPoint topRight,
                                             MagPoint bottomLeft, MagPoint bottomRight,
@@ -113,6 +115,7 @@ public class MagPenUtils {
         return new MagPoint(xPos, yPos, 0);
     }
 
+    // Low-pass filter
     public static float[] lowPass(float[] in, float[] out){
         if(out == null) return in;
         for(int i = 0; i < in.length; i++){
@@ -121,10 +124,12 @@ public class MagPenUtils {
         return out;
     }
 
+    // Magnitude from point
     public static float magnitude(MagPoint p){
         return (float)Math.sqrt(Math.pow(p.xPoint,2.0) + Math.pow(p.yPoint,2.0) + Math.pow(p.zPoint,2.0));
     }
 
+    // Magnitude from vector array
     public static float magnitude(float[] vals){
         float sidesTotal = 0;
         for(int i=0; i<vals.length; i++){
@@ -133,6 +138,7 @@ public class MagPenUtils {
         return (float)Math.sqrt(sidesTotal);
     }
 
+    // Click detection
     public static int detectNumberOfClicks(List<MagPoint> magPointList, float THRESHOLD)
     {
         float[] sortedMagPointMagnitudes = new float[magPointList.size()];
@@ -196,6 +202,7 @@ public class MagPenUtils {
         return count;
     }
 
+    // New click detection
     public static int detectNumberOfClicksNew(List<MagPoint> magPointList, float THRESHOLD)
     {
         float[] magPointMagnitudes = new float[magPointList.size()];
@@ -244,6 +251,7 @@ public class MagPenUtils {
         return count;
     }
 
+    // Single click
     public static boolean runSingleClickDetection(List<MagPoint> magPointList)
     {
         int numOfClicks = detectNumberOfClicksNew(magPointList, 7);
@@ -257,6 +265,7 @@ public class MagPenUtils {
         return false;
     }
 
+    // Double click
     public static boolean runDoubleClickDetection(List<MagPoint> magPointList)
     {
         int numOfClicks = detectNumberOfClicksNew(magPointList, 7);
@@ -270,7 +279,7 @@ public class MagPenUtils {
         return false;
     }
 
-
+    // Mean of array
     public static float mean(float[] m) {
         float sum = 0;
         for (int i = 0; i < m.length; i++) {
@@ -279,6 +288,7 @@ public class MagPenUtils {
         return sum / m.length;
     }
 
+    // Median of array
     public static float median(float[] m) {
         int middle = m.length/2;
         if (m.length%2 == 1) {
@@ -288,6 +298,7 @@ public class MagPenUtils {
         }
     }
 
+    // Max of array
     public static float maxVal (float[] numbers) {
 
         float highest = numbers[0];
@@ -300,6 +311,7 @@ public class MagPenUtils {
         return highest;
     }
 
+    // Min of array
     public static float minVal (float[] numbers) {
 
         float lowest = numbers[0];
