@@ -13,16 +13,22 @@ import android.view.View;
  */
 public class StrokeWidthView extends View {
 
+    // current color value
     private int progress;
+
+    // Default color
     private int color = 0xFF660000;
 
+    // placeholder for text bounds
     private Rect bounds = new Rect();
 
+    // CONSTTRUCTOR
     public StrokeWidthView(Context context, AttributeSet attrs){
         super(context,attrs);
         progress = 100;
     }
 
+    // Draw the view
     @Override
     protected void onDraw(Canvas canvas){
         Paint paint = new Paint();
@@ -32,18 +38,17 @@ public class StrokeWidthView extends View {
 
         //canvas.drawRect(getWidth()*.2f,getHeight()*.2f,getWidth()*.8f,getHeight()*.8f,paint);
 
+        // Title background
         paint.setColor(Color.rgb(8,81,156));
         paint.setStyle(Paint.Style.FILL);
-
         canvas.drawRect(0,0,getWidth(),getHeight()/4.0f,paint);
 
+        // Title
         String title = "Stroke Width";
-
         paint.setTextSize(getHeight()/4.0f*.5f);
         float textWidth = paint.measureText(title);
         paint.getTextBounds(title,0,title.length(),bounds);
         float textHeight = bounds.height();
-
         paint.setColor(Color.WHITE);
         canvas.drawText(title,getWidth()*.5f - textWidth/2.0f,getHeight()/8.0f + textHeight/2.0f,paint);
 
@@ -51,6 +56,7 @@ public class StrokeWidthView extends View {
         paint.setColor(color);
         paint.setStyle(Paint.Style.FILL);
 
+        // Draw updated stroke bar
         float start = getWidth()*.2f;
         float end = getWidth()*.8f;
         float width = end-start;
@@ -66,6 +72,7 @@ public class StrokeWidthView extends View {
         this.color = color;
     }
 
+    // Coverts percentage value to stroke width
     private float convertValueToWidth(float val){
 
         if(val > 100) return 100.0f;
