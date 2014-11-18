@@ -27,9 +27,6 @@ public class MagPenUtils {
         if(algoType == 0)
         {
             //4 corners algorithm
-            //float xRatio = (topLeft.xPoint - actualPointer.xPoint) / (topLeft.xPoint - bottomRight.xPoint);
-            //float yRatio = Math.abs((topLeft.yPoint - actualPointer.yPoint) / (topLeft.yPoint - bottomRight.yPoint));
-
             float xLoc1 = ((topLeft.xPoint - actualPointer.xPoint) / (topLeft.xPoint - topRight.xPoint));
             float xLoc2 = (bottomLeft.xPoint - actualPointer.xPoint) / (bottomLeft.xPoint - bottomRight.xPoint);
             xPos = width * ((xLoc1 + xLoc2)/2.0f);
@@ -50,45 +47,44 @@ public class MagPenUtils {
             float x = actualPointer.xPoint;
             float y = actualPointer.yPoint;
 
+            // Distances from reference points to current point
             float d1 = (float)Math.sqrt(Math.pow(x-i1,2) + Math.pow(y - j1,2));
             float d2 = (float)Math.sqrt(Math.pow(x-i2,2) + Math.pow(y - j2,2));
             float d3 = (float)Math.sqrt(Math.pow(x-i3,2) + Math.pow(y - j3,2));
 
+            // estimated location
             float xLoc = (float)((((Math.pow(d1,2)-Math.pow(d2,2)) + (Math.pow(i2,2)-Math.pow(i1,2)) + (Math.pow(j2,2)-Math.pow(j1,2))) * (2*j3-2*j2) - ((Math.pow(d2,2)-Math.pow(d3,2)) + (Math.pow(i3,2)-Math.pow(i2,2)) + (Math.pow(j3,2)-Math.pow(j2,2))) *(2*j2-2*j1) ) / ( (2*i2-2*i3)*(2*j2-2*j1)-(2*i1-2*i2)*(2*j3-2*j2 ) ));
             float yLoc = (float)(((Math.pow(d1,2)-Math.pow(d2,2)) + (Math.pow(i2,2)-Math.pow(i1,2)) + (Math.pow(j2,2)-Math.pow(j1,2)) + x*(2*i1-2*i2)) / (2*j2-2*j1));
 
+            // account for cubic fall off
             xPos = (float)Math.cbrt(((i1 - xLoc) / (i1 - bottomRight.xPoint))) * width;
             yPos = (float)Math.cbrt(((j1 - yLoc) / (j1 - bottomRight.yPoint))) * height;
         }
         else if(algoType == 2)
         {
             //projection on planes
-//            float[] newTopRight = new float[3];
-//            newTopRight[0] = topLeft.xPoint - topRight.xPoint;
-//            newTopRight[1] = topLeft.yPoint - topRight.yPoint;
-//            newTopRight[2] = topLeft.zPoint - topRight.zPoint;
-//
-//            float [] newBottomLeft = new float[3];
-//            newBottomLeft[0] = topLeft.xPoint - bottomLeft.xPoint;
-//            newBottomLeft[1] = topLeft.yPoint - bottomLeft.yPoint;
-//            newBottomLeft[2] = topLeft.zPoint - bottomLeft.zPoint;
-//
-//            float scaleX = MagPenUtils.magnitude(newTopRight) / (topRight.xPoint - topLeft.xPoint);
-//            float deltaX = -scaleX*topLeft.xPoint;
-//
-//            float scaleY = MagPenUtils.magnitude(newBottomLeft) / (bottomLeft.yPoint - topLeft.yPoint);
-//            float deltaY = -scaleY*topLeft.yPoint;
-//
-//            xPos = (actualPointer.xPoint * scaleX + deltaX) / MagPenUtils.magnitude(newTopRight) * width;
-//            yPos = (actualPointer.yPoint * scaleY + deltaY) / MagPenUtils.magnitude(newBottomLeft) * height;
 
+            // Rotation angle around Z
             float theta = (float)Math.atan((topRight.yPoint - topLeft.yPoint)/(topLeft.xPoint - topRight.xPoint));
 
-            float y3 = (float)(bottomRight.xPoint * Math.sin(theta) + bottomRight.yPoint * Math.cos(theta));
-            float y2 = (float)(topRight.xPoint * Math.sin(theta) + topRight.yPoint * Math.cos(theta));
-            float x3 = (float)(bottomRight.xPoint * Math.cos(theta) - bottomRight.yPoint * Math.sin(theta));
-            float x1 = (float)(topLeft.xPoint * Math.cos(theta) - topLeft.yPoint * Math.sin(theta));
+            // Rotate around z axis
+            float y32 = (float)(bottomRight.xPoint * Math.sin(theta) + bottomRight.yPoint * Math.cos(theta));
+            float y22 = (float)(topRight.xPoint * Math.sin(theta) + topRight.yPoint * Math.cos(theta));
+            float y12 = (float)(topLeft.xPoint * Math.sin(theta) + topLeft.yPoint * Math.cos(theta));
+            float x32 = (float)(bottomRight.xPoint * Math.cos(theta) - bottomRight.yPoint * Math.sin(theta));
+            float x22 = (float)(topRight.xPoint * Math.cos(theta) - topRight.yPoint * Math.sin(theta));
+            float x12 = (float)(topLeft.xPoint * Math.cos(theta) - topLeft.yPoint * Math.sin(theta));
 
+            // Rotation angle around Y
+            float theta2 = (float)Math.atan((topLeft.zPoint - bottomLeft.zPoint)/(x12 - (float)(bottomLeft.xPoint * Math.cos(theta) - bottomLeft.yPoint * Math.sin(theta))));
+
+            // Rotate around y axis
+            float y3 = (float)(x32 * Math.sin(theta2) + y32 * Math.cos(theta2));
+            float y2 = (float)(x22 * Math.sin(theta2) + y22 * Math.cos(theta2));
+            float x3 = (float)(x32 * Math.cos(theta2) - y32 * Math.sin(theta2));
+            float x1 = (float)(x12 * Math.cos(theta2) - y12 * Math.sin(theta2));
+
+            // Scale and offset
             float a = 1.0f/(x3-x1);
             float b = 1.0f/(y3-y2);
             float i = 1.0f - a*bottomRight.xPoint;
@@ -97,13 +93,20 @@ public class MagPenUtils {
             float newX = (float)(actualPointer.xPoint * Math.cos(theta) - actualPointer.yPoint * Math.sin(theta));
             float newY = (float)(actualPointer.xPoint * Math.sin(theta) + actualPointer.yPoint * Math.cos(theta));
 
-            float xRatio = (a*newX + i);
+            float newX2 = (float)(actualPointer.xPoint * Math.cos(theta2) - actualPointer.yPoint * Math.sin(theta2));
+            //float newY2 = (float)(actualPointer.xPoint * Math.sin(theta2) + actualPointer.yPoint * Math.cos(theta2));
+
+            float xRatio = (a*newX2 + i);
             float yRatio = (b*newY + j);
             float xLoc = xRatio * width;
             float yLoc = yRatio * height;
 
+
+            float fixRatio = bottomLeft.yPoint / bottomRight.yPoint;
+            float yDivider = fixRatio*2 - xRatio*(fixRatio*2-1.0f);
+
             xPos = xLoc;
-            yPos = yLoc;
+            yPos = yLoc;// /yDivider;
 
         }
 
