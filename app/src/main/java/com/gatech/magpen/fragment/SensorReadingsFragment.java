@@ -179,11 +179,6 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
     @Override
     public void onSensorChanged(SensorEvent event) {
         float[] rawValues = event.values.clone();
-
-        rawValues[0] = (float)Math.cbrt((double)rawValues[0]);
-        rawValues[1] = (float)Math.cbrt((double)rawValues[1]);
-        rawValues[2] = (float)Math.cbrt((double)rawValues[2]);
-
         float[] currentValues;
 
         // Apply filter
