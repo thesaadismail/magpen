@@ -124,6 +124,13 @@ public class SensorReadingsView extends View{
                         width, height);
 
                 canvas.drawCircle(lastKnownPenValue.xPoint,lastKnownPenValue.yPoint,10,paint);
+                paint.setTextSize(40);
+                String xPointFormatted = String.format("%.0f", lastKnownMagValue.xPoint);
+                String yPointFormatted = String.format("%.0f", lastKnownMagValue.yPoint);
+
+                paint.setColor(Color.GRAY);
+                canvas.drawText("MagPoint: ",lastKnownPenValue.xPoint-80,lastKnownPenValue.yPoint-65,paint);
+                canvas.drawText("("+xPointFormatted+","+yPointFormatted+")",lastKnownPenValue.xPoint-80,lastKnownPenValue.yPoint-20,paint);
             }
 
         }
