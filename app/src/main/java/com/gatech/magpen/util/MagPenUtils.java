@@ -116,12 +116,12 @@ public class MagPenUtils {
     }
 
     // Low-pass filter
-    public static float[] lowPass(float[] in, float[] out){
-        if(out == null) return in;
-        for(int i = 0; i < in.length; i++){
-            out[i] = out[i] + ALPHA * (in[i]-out[i]);
+    public static float[] lowPass(float[] currentValues, float[] previousValues){
+        if(previousValues == null) return currentValues;
+        for(int i = 0; i < currentValues.length; i++){
+            previousValues[i] = previousValues[i] + ALPHA * (currentValues[i]-previousValues[i]);
         }
-        return out;
+        return previousValues;
     }
 
     // Magnitude from point

@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.TextView;
 
 import com.gatech.magpen.helper.MagPoint;
 import com.gatech.magpen.util.MagPenUtils;
@@ -21,7 +20,6 @@ import java.util.ArrayList;
 public class SensorReadingsView extends View{
 
     // Flags
-    private boolean isFiltered;
     private boolean showReadings;
 
     // Saved Sensor Data
@@ -52,7 +50,6 @@ public class SensorReadingsView extends View{
         xs = new ArrayList<Float>();
         ys = new ArrayList<Float>();
         zs = new ArrayList<Float>();
-        isFiltered = false;
         showReadings = true;
         zeros = new float[] {0.0f,0.0f,0.0f};
     }
@@ -133,46 +130,18 @@ public class SensorReadingsView extends View{
 
     }
 
-    // Simple low pass filter
-    public float[] lowPass(float[] in, float[] out){
-        if(out == null) return in;
-        for(int i = 0; i < in.length; i++){
-            out[i] = out[i] + ALPHA * (in[i]-out[i]);
-        }
-        return out;
-    }
-
     // Take in sensor reading values and apply filter if enabled
-    public void addValues(float[] vals, TextView tv){
+    public void addValues(float[] vals){
         /*
          * IMPORTANT: Stored values do not have the zero offset applied
          */
 
-
-        // Apply filter
-        if(isFiltered)
-            prev = lowPass(vals,prev);
-
         // Raw Readings
-        else
-            prev = vals;
+        prev = vals;
 
         xs.add(prev[0]);
         ys.add(prev[1]);
         zs.add(prev[2]);
-
-        if(tv != null)
-            tv.setText("X: " + Float.toString(prev[0] - zeros[0]) + "\n" +
-                            "Y: " + Float.toString(prev[1] - zeros[1]) + "\n" +
-                            "Z: " + Float.toString(prev[2] - zeros[2]) + "\n" +
-                            "Intensity: " + Math.sqrt(Math.pow(prev[0]-zeros[0], 2)+Math.pow(prev[1]-zeros[1], 2)+Math.pow(prev[2]-zeros[2], 2)));
-
-
-    }
-
-    // Toggle filter
-    public void setFilter(boolean filterFlag){
-        isFiltered = filterFlag;
     }
 
     // Toggle readings view / position view

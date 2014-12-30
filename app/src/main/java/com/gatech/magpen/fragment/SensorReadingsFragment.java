@@ -16,6 +16,8 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.gatech.magpen.R;
+import com.gatech.magpen.helper.MagPoint;
+import com.gatech.magpen.util.MagPenUtils;
 import com.gatech.magpen.view.SensorReadingsView;
 
 import java.util.ArrayList;
@@ -37,10 +39,10 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
     private Sensor magnetometer;
 
     //Sensor Readings
-    private ArrayList<Float> zeroX;
-    private ArrayList<Float> zeroY;
-    private ArrayList<Float> zeroZ;
-    private float[] prev;
+    private ArrayList<MagPoint> zeroValuesBuffer;
+    final private int ZERO_BUFFER_SIZE = 30;
+    private MagPoint zeroValues;
+    private MagPoint previousValues;
 
     //Listeners
     private CompoundButton.OnCheckedChangeListener filterListener;
@@ -48,12 +50,14 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
     private View.OnClickListener zeroButtonListener;
     private View.OnClickListener calibrateButtonlistener;
 
+    private boolean isFiltered;
+
     // Components
-    private TextView tv;
-    private CheckBox fBox;
-    private CheckBox rBox;
-    private Button zb;
-    private Button cb;
+    private TextView axisValuesTextView;
+    private CheckBox filterCheckbox;
+    private CheckBox displayReadingsCheckBox;
+    private Button zeroButton;
+    private Button calibrateButton;
 
     // Flags
     private boolean isZeroing;
@@ -61,6 +65,8 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        isFiltered = false;
 
         parentActivity = (ActionBarActivity)getActivity();
 
@@ -74,17 +80,15 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
         mSensorManager = (SensorManager)parentActivity.getSystemService(Context.SENSOR_SERVICE);
         magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
-        tv = (TextView) rootView.findViewById(R.id.readings_text);
-        fBox = (CheckBox) rootView.findViewById(R.id.filter_box);
-        rBox = (CheckBox) rootView.findViewById(R.id.readings_box);
-        zb = (Button) rootView.findViewById(R.id.zero_button);
-        cb = (Button) rootView.findViewById(R.id.calibrate_button);
+        axisValuesTextView = (TextView) rootView.findViewById(R.id.readings_text);
+        filterCheckbox = (CheckBox) rootView.findViewById(R.id.filter_box);
+        displayReadingsCheckBox = (CheckBox) rootView.findViewById(R.id.readings_box);
+        zeroButton = (Button) rootView.findViewById(R.id.zero_button);
+        calibrateButton = (Button) rootView.findViewById(R.id.calibrate_button);
 
         isZeroing = false;
 
-        zeroX = new ArrayList<Float>();
-        zeroY = new ArrayList<Float>();
-        zeroZ = new ArrayList<Float>();
+        zeroValuesBuffer = new ArrayList<MagPoint>();
 
         setUpListeners();
 
@@ -97,7 +101,7 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
         filterListener = new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                sensorReadingsView.setFilter(compoundButton.isChecked());
+                isFiltered = compoundButton.isChecked();
             }
         };
 
@@ -119,16 +123,16 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
             @Override
             public void onClick(View view) {
                 if(sensorReadingsView.calibrationState < 4){
-                    sensorReadingsView.setCalibration(prev.clone());
+                    sensorReadingsView.setCalibration(previousValues.toFloatArray());
                     switch(sensorReadingsView.calibrationState){
                         case 1:
-                            cb.setText("Calibrate Top Right");
+                            calibrateButton.setText("Calibrate Top Right");
                             break;
                         case 2:
-                            cb.setText("Calibrate Bottom Left");
+                            calibrateButton.setText("Calibrate Bottom Left");
                             break;
                         case 3:
-                            cb.setText("Calibrate Bottom Right");
+                            calibrateButton.setText("Calibrate Bottom Right");
                             break;
                         default:
                             break;
@@ -143,20 +147,20 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
     public void onResume(){
         super.onResume();
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_FASTEST);
-        fBox.setOnCheckedChangeListener(filterListener);
-        rBox.setOnCheckedChangeListener(readingsListener);
-        zb.setOnClickListener(zeroButtonListener);
-        cb.setOnClickListener(calibrateButtonlistener);
+        filterCheckbox.setOnCheckedChangeListener(filterListener);
+        displayReadingsCheckBox.setOnCheckedChangeListener(readingsListener);
+        zeroButton.setOnClickListener(zeroButtonListener);
+        calibrateButton.setOnClickListener(calibrateButtonlistener);
 
     }
 
     @Override
     public void onStop() {
         mSensorManager.unregisterListener(this);
-        fBox.setOnCheckedChangeListener(null);
-        rBox.setOnCheckedChangeListener(null);
-        zb.setOnClickListener(null);
-        cb.setOnClickListener(null);
+        filterCheckbox.setOnCheckedChangeListener(null);
+        displayReadingsCheckBox.setOnCheckedChangeListener(null);
+        zeroButton.setOnClickListener(null);
+        calibrateButton.setOnClickListener(null);
         super.onStop();
     }
 
@@ -174,57 +178,102 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        float[] rawValues = event.values.clone();
+
+        rawValues[0] = (float)Math.cbrt((double)rawValues[0]);
+        rawValues[1] = (float)Math.cbrt((double)rawValues[1]);
+        rawValues[2] = (float)Math.cbrt((double)rawValues[2]);
+
+        float[] currentValues;
+
+        // Apply filter
+        if(isFiltered && previousValues != null)
+            currentValues = MagPenUtils.lowPass(rawValues.clone(), previousValues.toFloatArray());
+        else
+            currentValues = rawValues;
 
         // if currently trying to zero the sensor
-        if(isZeroing){
-
-            if(zeroX.size() >= 30){
-                float avgX = avgArray(zeroX);
-                float avgY = avgArray(zeroY);
-                float avgZ = avgArray(zeroZ);
-
-                sensorReadingsView.setZeros(avgX, avgY, avgZ);
-
-                zeroX.clear();
-                zeroY.clear();
-                zeroZ.clear();
-
-                prev = null;
+        if(isZeroing)
+        {
+            //make sure we have at least 30 values, if not then continue adding to the zero array
+            //if we have atleast 30 values then average the values out
+            //if the method returns true then turn off zeroing
+            if(zeroValuesBuffer.size() >= 30 && averageZeroBufferValues())
+            {
                 isZeroing = false;
             }
-
-            else {
-                prev = sensorReadingsView.lowPass(event.values.clone(), prev);
-                zeroX.add(prev[0]);
-                zeroY.add(prev[1]);
-                zeroZ.add(prev[2]);
+            else
+            {
+                zeroValuesBuffer.add(new MagPoint(currentValues));
             }
 
         }
-        // else pass values to the sensorReadingView
-        else {
-            prev = sensorReadingsView.lowPass(event.values.clone(),prev);
-            sensorReadingsView.addValues(event.values.clone(), tv);
+        else // else pass values to the sensorReadingView
+        {
+            //if zeroValues is not empty, then subtract the actual values with the zero averages
+            if(zeroValues != null)
+            {
+                currentValues[0] = currentValues[0] - zeroValues.xPoint;
+                currentValues[1] = currentValues[1] - zeroValues.yPoint;
+                currentValues[2] = currentValues[2] - zeroValues.zPoint;
+            }
+
+            sensorReadingsView.addValues(currentValues);
             sensorReadingsView.invalidate();
+
+            double intensity = Math.sqrt(Math.pow(currentValues[0], 2)+Math.pow(currentValues[1], 2)+Math.pow(currentValues[2], 2));
+
+            axisValuesTextView.setText("X: " + Float.toString(currentValues[0]) + "\n" +
+                    "Y: " + Float.toString(currentValues[1]) + "\n" +
+                    "Z: " + Float.toString(currentValues[2]) + "\n" +
+                    "Intensity: " + intensity);
+
+            setPreviousValues(currentValues);
         }
 
+    }
+
+    public boolean averageZeroBufferValues()
+    {
+        //only if the buffer is greater than the buffer size then average the values
+        if(zeroValuesBuffer.size() >= ZERO_BUFFER_SIZE)
+        {
+            float xTotal = 0.0f;
+            float yTotal = 0.0f;
+            float zTotal = 0.0f;
+
+            for(int i = 0; i < zeroValuesBuffer.size(); i++){
+                xTotal += zeroValuesBuffer.get(i).xPoint;
+                yTotal += zeroValuesBuffer.get(i).yPoint;
+                zTotal += zeroValuesBuffer.get(i).zPoint;
+            }
+
+            int arraySize = zeroValuesBuffer.size();
+            zeroValues = new MagPoint(xTotal/arraySize, yTotal/arraySize, xTotal/arraySize);
+            zeroValuesBuffer.clear();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public void setPreviousValues(float[] previousValuesArray)
+    {
+        if(previousValues == null)
+        {
+            previousValues = new MagPoint(previousValuesArray);
+        }
+        else
+        {
+            previousValues.xPoint = previousValuesArray[0];
+            previousValues.yPoint = previousValuesArray[1];
+            previousValues.zPoint = previousValuesArray[2];
+        }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
-
-    }
-
-    // Return the avg value of floats in the array
-    private float avgArray(ArrayList<Float> in){
-
-        float total = 0.0f;
-
-        for(int i = 0; i < in.size(); i++){
-            total += in.get(i);
-        }
-
-        return total/(float)in.size();
 
     }
 
