@@ -218,10 +218,16 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
 
             double intensity = Math.sqrt(Math.pow(currentValues[0], 2)+Math.pow(currentValues[1], 2)+Math.pow(currentValues[2], 2));
 
-            axisValuesTextView.setText("X: " + Float.toString(currentValues[0]) + "\n" +
-                    "Y: " + Float.toString(currentValues[1]) + "\n" +
-                    "Z: " + Float.toString(currentValues[2]) + "\n" +
-                    "Intensity: " + intensity);
+            String xPointFormatted = String.format("%.1f", currentValues[0]);
+            String yPointFormatted = String.format("%.1f", currentValues[1]);
+            String zPointFormatted = String.format("%.1f", currentValues[2]);
+            String intensityFormatted = String.format("%.1f", intensity);
+            String intensityCBRTFormatted = String.format("%.1f", Math.cbrt(intensity));
+
+            axisValuesTextView.setText("X: " + xPointFormatted + "\n" +
+                    "Y: " + yPointFormatted + "\n" +
+                    "Z: " + zPointFormatted + "\n" +
+                    "Intensity: " + intensityFormatted);
 
             setPreviousValues(currentValues);
         }
@@ -244,7 +250,7 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
             }
 
             int arraySize = zeroValuesBuffer.size();
-            zeroValues = new MagPoint(xTotal/arraySize, yTotal/arraySize, xTotal/arraySize);
+            zeroValues = new MagPoint(xTotal/arraySize, yTotal/arraySize, zTotal/arraySize);
             zeroValuesBuffer.clear();
 
             return true;
