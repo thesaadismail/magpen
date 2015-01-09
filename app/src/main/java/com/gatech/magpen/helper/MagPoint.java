@@ -25,6 +25,19 @@ public class MagPoint {
         }
     }
 
+    public float getAxisValue(int axis){
+        switch (axis){
+            case 0:
+                return xPoint;
+            case 1:
+                return yPoint;
+            case 2:
+                return zPoint;
+        }
+
+        return 0;
+    }
+
     public float[] toFloatArray()
     {
         return new float[]{xPoint, yPoint, zPoint};

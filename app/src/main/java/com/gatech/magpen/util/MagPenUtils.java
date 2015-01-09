@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.ArrayList;
 
 /**
  * Created by sismail on 11/10/14.
@@ -510,6 +511,116 @@ public class MagPenUtils {
     // Distance Between MagPoints
     public static float distance(MagPoint p1, MagPoint p2) {
         return (float)Math.sqrt( Math.pow(p2.xPoint - p1.xPoint,2) + Math.pow(p2.yPoint - p1.yPoint,2) + Math.pow(p2.zPoint - p1.zPoint,2));
+    }
+
+    /**
+     * Apply hamming window on input data.
+     *
+     * @param input
+     * @param filter, the coeffiecnts of the hamming window with certain length
+     * @param naormalized whether normalize the result after applying hanning window
+     * @return
+     */
+    public static float applyHanning(float[] input, float[] filter, boolean normarlized){
+        if(input==null) return 0;
+        float[] res = cutoffEdge(convolution(input, filter),filter.length);
+
+        if(normarlized){
+            float totalFilter = 0;
+            for(int i=0; i<filter.length;++i) totalFilter+= filter[i];
+            for(int i=0; i<res.length;++i){
+               res[i] = res[i]/totalFilter;
+            }
+        }
+
+        return res[res.length/2];
+    }
+
+    public static float applyHanning(float[] input, float[] filter){
+        if(input==null||input.length!=filter.length) return 0;
+
+        float res = 0;
+        float filteradd = 0;
+        for(int i=0; i<input.length;++i){
+            res += input[i]*filter[i];
+            filteradd += filter[i];
+        }
+        System.out.println("Hanning result: "+res/filteradd);
+        return res/filteradd;
+    }
+
+    /* axis is indicating which axis is retrieving the data from x:0, y:1, Z:2*/
+    public static float[] getAxisData(ArrayList<MagPoint> input, int axis){
+        float[] res= new float[input.size()];
+        for(int i=0; i<input.size();++i){
+            res[i] = input.get(i).getAxisValue(axis);
+        }
+        return res;
+    }
+
+    public static float[] applyHanning(ArrayList<MagPoint> input, float[] filter, boolean normalized){
+        float[] res = new float[3];
+        float[] xdata = getAxisData(input,0);
+        float[] ydata = getAxisData(input,1);;
+        float[] zdata = getAxisData(input,2);;
+
+        res[0] = applyHanning(xdata,filter);
+        res[1] = applyHanning(ydata,filter);
+        res[2] = applyHanning(zdata,filter);
+
+        return res;
+    }
+
+    /**
+     * Cut off the edge of the convolution result
+     * @param input
+     * @param filtersize
+     * @return
+     */
+    private static float[] cutoffEdge(float[] input, int filtersize){
+        int cutoffsize = (filtersize/2);
+        float[] output = new float[input.length-cutoffsize*2];
+        for(int i=cutoffsize; i<input.length-cutoffsize;++i){
+            output[i-cutoffsize] = input[i];
+        }
+
+        return output;
+    }
+
+
+    /**
+     * Cheng's implementation of conv, The earlier version may get errors as the index will go wrong
+     * @param Signal
+     * @param Filter Coeffcients
+     * @return
+     */
+    public static float[]  convolution(float Signal[], float Kernel[]){
+        int SingalLen = Signal.length;
+        int KernalLen = Kernel.length;
+        float [] Result = new float[SingalLen + KernalLen-1];
+        int n ;
+        for(n=0;n< SingalLen+KernalLen-1; n++){
+            int kmin,kmax,k;
+            Result[n] = 0;
+            kmin = (n >= KernalLen-1)? n-(KernalLen-1) : 0;
+            kmax = (n < SingalLen-1)? n: SingalLen-1;
+
+            for(k = kmin; k <= kmax; k++){
+                Result[n] += Signal[k] * Kernel[n-k];
+            }
+        }
+
+        return Result;
+    }
+
+    public static ArrayList<MagPoint> add2List(ArrayList<MagPoint> list, MagPoint newpoint, int size){
+        if(list==null||size<1) return list;
+        if(list.size()>=size)
+            list.remove(0);
+
+        list.add(newpoint);
+
+        return list;
     }
 
 }

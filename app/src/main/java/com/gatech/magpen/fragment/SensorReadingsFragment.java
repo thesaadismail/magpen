@@ -17,6 +17,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.gatech.magpen.R;
 import com.gatech.magpen.helper.MagPoint;
+import com.gatech.magpen.util.Constants;
 import com.gatech.magpen.util.MagPenUtils;
 import com.gatech.magpen.view.SensorReadingsView;
 
@@ -43,6 +44,7 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
     final private int ZERO_BUFFER_SIZE = 30;
     private MagPoint zeroValues;
     private MagPoint previousValues;
+    private ArrayList<MagPoint> pointsBuffer;
 
     //Listeners
     private CompoundButton.OnCheckedChangeListener filterListener;
@@ -89,6 +91,9 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
         isZeroing = false;
 
         zeroValuesBuffer = new ArrayList<MagPoint>();
+
+        pointsBuffer = new ArrayList<MagPoint>();
+
 
         setUpListeners();
 
@@ -176,50 +181,20 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
         return false;
     }
 
-    public void applyLogFilter(float[] rawValues)
-    {
-        int index = 0;
-        int alpha = 10;
-        if(rawValues[index]<0)
-        {
-            rawValues[index] = -1 * (float)Math.log(Math.abs((double)rawValues[index])) * alpha;
-        }
-        else
-        {
-            rawValues[index] = (float)Math.log((double)rawValues[index]) * alpha;
-        }
-
-        index = 1;
-        if(rawValues[index]<0)
-        {
-            rawValues[index] = -1 * (float)Math.log(Math.abs((double)rawValues[index])) * alpha;
-        }
-        else
-        {
-            rawValues[index] = (float)Math.log((double)rawValues[index]) * alpha;
-        }
-
-        index = 2;
-        if(rawValues[index]<0)
-        {
-            rawValues[index] = -1 * (float)Math.log(Math.abs((double)rawValues[index])) * alpha;
-        }
-        else
-        {
-            rawValues[index] = (float)Math.log((double)rawValues[index]) * alpha;
-        }
-    }
     @Override
     public void onSensorChanged(SensorEvent event) {
         float[] rawValues = event.values.clone();
-
-        //applyLogFilter(rawValues);
-
         float[] currentValues;
 
+        MagPoint curPoint = new MagPoint(rawValues);
+        MagPenUtils.add2List(pointsBuffer,curPoint, Constants.bufLength);
+
         // Apply filter
-        if(isFiltered && previousValues != null)
-            currentValues = MagPenUtils.lowPass(rawValues.clone(), previousValues.toFloatArray());
+        if(isFiltered && previousValues != null&&pointsBuffer.size()==Constants.bufLength){
+            //            currentValues = MagPenUtils.lowPass(rawValues.clone(), previousValues.toFloatArray());
+            currentValues = MagPenUtils.applyHanning(pointsBuffer,Constants.HANNING_WINDOW_21,true);
+            System.out.println("Size of the buffer:  "+pointsBuffer.size()+ "   filter called");
+        }
         else
             currentValues = rawValues;
 
@@ -254,11 +229,11 @@ public class SensorReadingsFragment extends Fragment implements SensorEventListe
 
             double intensity = Math.sqrt(Math.pow(currentValues[0], 2)+Math.pow(currentValues[1], 2)+Math.pow(currentValues[2], 2));
 
-            String xPointFormatted = String.format("%.4f", currentValues[0]);
-            String yPointFormatted = String.format("%.4f", currentValues[1]);
-            String zPointFormatted = String.format("%.4f", currentValues[2]);
-            String intensityFormatted = String.format("%.4f", intensity);
-            String intensityCBRTFormatted = String.format("%.4f", Math.cbrt(intensity));
+            String xPointFormatted = String.format("%.1f", currentValues[0]);
+            String yPointFormatted = String.format("%.1f", currentValues[1]);
+            String zPointFormatted = String.format("%.1f", currentValues[2]);
+            String intensityFormatted = String.format("%.1f", intensity);
+            String intensityCBRTFormatted = String.format("%.1f", Math.cbrt(intensity));
 
             axisValuesTextView.setText("X: " + xPointFormatted + "\n" +
                     "Y: " + yPointFormatted + "\n" +
