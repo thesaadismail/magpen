@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
  */
 public class MagPenUtils {
 
+    private static final String TAG = "MagPenUtils";
     // Percentage change allowance for low-pass filter
     private static float ALPHA = 0.1f;
 
@@ -25,6 +26,11 @@ public class MagPenUtils {
                                             MagPoint bottomLeft, MagPoint bottomRight,
                                             MagPoint actualPointer, float width, float height)
     {
+        MagPoint originalTopLeft = new MagPoint(topLeft.toFloatArray());
+        MagPoint originalTopRight = new MagPoint(topRight.toFloatArray());
+        MagPoint originalBottomLeft = new MagPoint(bottomLeft.toFloatArray());
+        MagPoint originalBottomRight = new MagPoint(bottomRight.toFloatArray());
+
         float xPos = 0, yPos = 0;
         if(algoType == 0)
         {
@@ -64,9 +70,7 @@ public class MagPenUtils {
         }
         else if(algoType == 2)
         {
-            // Projection On Planes
-
-            // CENTERED ON TOP RIGHT
+            //projection on planes
 
             // Rotation angle around Z
             float theta = (float)Math.atan((topRight.yPoint - topLeft.yPoint)/(topLeft.xPoint - topRight.xPoint));
@@ -80,7 +84,7 @@ public class MagPenUtils {
             float x12 = (float)(topLeft.xPoint * Math.cos(theta) - topLeft.yPoint * Math.sin(theta));
 
             // Rotation angle around Y
-            float theta2 = (float)Math.atan((topLeft.zPoint - topRight.zPoint)/(topLeft.xPoint - topRight.xPoint));
+            float theta2 = (float)Math.atan((topLeft.zPoint - bottomLeft.zPoint)/(x12 - (float)(bottomLeft.xPoint * Math.cos(theta) - bottomLeft.yPoint * Math.sin(theta))));
 
             // Rotate around y axis
             float y3 = (float)(x32 * Math.sin(theta2) + y32 * Math.cos(theta2));
@@ -97,11 +101,11 @@ public class MagPenUtils {
             float newX = (float)(actualPointer.xPoint * Math.cos(theta) - actualPointer.yPoint * Math.sin(theta));
             float newY = (float)(actualPointer.xPoint * Math.sin(theta) + actualPointer.yPoint * Math.cos(theta));
 
-            float newX2 = (float)(newX * Math.cos(theta2) - newY * Math.sin(theta2));
-            float newY2 = (float)(newX * Math.sin(theta2) + newY * Math.cos(theta2));
+            float newX2 = (float)(actualPointer.xPoint * Math.cos(theta2) - actualPointer.yPoint * Math.sin(theta2));
+            //float newY2 = (float)(actualPointer.xPoint * Math.sin(theta2) + actualPointer.yPoint * Math.cos(theta2));
 
             float xRatio = (a*newX2 + i);
-            float yRatio = (b*newY2 + j);
+            float yRatio = (b*newY + j);
             float xLoc = xRatio * width;
             float yLoc = yRatio * height;
 
@@ -112,191 +116,291 @@ public class MagPenUtils {
             xPos = xLoc;
             yPos = yLoc;// /yDivider;
 
-            // Pos Based on Top Right
-            MagPoint tR = new MagPoint(xPos,yPos,0);
+        }
+        else if(algoType == 3)
+        {
+            //rotational matricies
 
-            // CENTERED ON TOP LEFT
+            //=====================
+            //   Flatten Z Axis
+            //=====================
 
-            // Rotation angle around Z
-            theta = (float)Math.atan((topRight.yPoint - topLeft.yPoint)/(topLeft.xPoint - topRight.xPoint));
+            //find lowest calibration point with z value
+            float lowestZValue = topLeft.zPoint;
+            if(topRight.zPoint < lowestZValue)
+                lowestZValue = topRight.zPoint;
+            if(bottomLeft.zPoint < lowestZValue)
+                lowestZValue = bottomLeft.zPoint;
+            if(bottomRight.zPoint < lowestZValue)
+                lowestZValue = bottomRight.zPoint;
 
-            // Rotate around z axis
-            y32 = (float)(topRight.xPoint * Math.sin(theta) + topRight.yPoint * Math.cos(theta));
-            y22 = (float)(topLeft.xPoint * Math.sin(theta) + topLeft.yPoint * Math.cos(theta));
-            y12 = (float)(bottomLeft.xPoint * Math.sin(theta) + bottomLeft.yPoint * Math.cos(theta));
-            x32 = (float)(topRight.xPoint * Math.cos(theta) - topRight.yPoint * Math.sin(theta));
-            x22 = (float)(topLeft.xPoint * Math.cos(theta) - topLeft.yPoint * Math.sin(theta));
-            x12 = (float)(bottomLeft.xPoint * Math.cos(theta) - bottomLeft.yPoint * Math.sin(theta));
+            //flatten z axis: subtract every z value by this lowest calibration point
+            topLeft.zPoint -= lowestZValue;
+            topRight.zPoint -= lowestZValue;
+            bottomLeft.zPoint -= lowestZValue;
+            bottomRight.zPoint -= lowestZValue;
 
-            // Rotation angle around Y
-            theta2 = (float)Math.atan((topLeft.zPoint - topRight.zPoint)/(topLeft.xPoint - topRight.xPoint));
+            //flatten z axis: rotate calibration points across the y axis to convert the z value to zero
+            topLeft = flattenZAxis(topLeft);
+            topRight = flattenZAxis(topRight);
+            bottomLeft = flattenZAxis(bottomLeft);
+            bottomRight = flattenZAxis(bottomRight);
 
-            // Rotate around y axis
-            y3 = (float)(x32 * Math.sin(theta2) + y32 * Math.cos(theta2));
-            y2 = (float)(x22 * Math.sin(theta2) + y22 * Math.cos(theta2));
-            float y1 = (float)(x12 * Math.sin(theta2) + y12 * Math.cos(theta2));
-            x3 = (float)(x32 * Math.cos(theta2) - y32 * Math.sin(theta2));
-            x1 = (float)(x12 * Math.cos(theta2) - y12 * Math.sin(theta2));
-            float x2 = (float)(x22 * Math.cos(theta2) - y22 * Math.sin(theta2));
+            //make bottom left 0,0. subtract all values by top right (x,y).
+            //by this point z values should all be 0.
+            MagPoint subtractWithTopRight = new MagPoint(topRight.toFloatArray());
+            topLeft.subtract(subtractWithTopRight);
+            topRight.subtract(subtractWithTopRight);
+            bottomRight.subtract(subtractWithTopRight);
+            bottomLeft.subtract(subtractWithTopRight);
 
-            // Scale and offset
-            a = 1.0f/(x3-x2);
-            b = 1.0f/(y1-y3);
-            i = 1.0f - a*bottomRight.xPoint;
-            j = 1.0f - b*bottomRight.yPoint;
+            //=====================
+            //Modify Actual Pointer for Z Axis
+            //=====================
 
-            newX = (float)(actualPointer.xPoint * Math.cos(theta) - actualPointer.yPoint * Math.sin(theta));
-            newY = (float)(actualPointer.xPoint * Math.sin(theta) + actualPointer.yPoint * Math.cos(theta));
+            //flatten z axis: actual pointer - flatten z axis with lowest z value
+            actualPointer.zPoint -= lowestZValue;
 
-            newX2 = (float)(newX * Math.cos(theta2) - newY * Math.sin(theta2));
-            newY2 = (float)(newX * Math.sin(theta2) + newY * Math.cos(theta2));
+            //flatten z axis: rotate pointer
+            actualPointer = flattenZAxis(actualPointer);
 
-            xRatio = (a*newX2 + i);
-            yRatio = (b*newY2 + j);
-            xLoc = xRatio * width;
-            yLoc = yRatio * height;
+            //subtract actual pointer with bottom left values
+            actualPointer.subtract(subtractWithTopRight);
 
+            //=====================
+            //Calculate Percentages
+            //=====================
 
-            fixRatio = bottomLeft.yPoint / bottomRight.yPoint;
-            yDivider = fixRatio*2 - xRatio*(fixRatio*2-1.0f);
+            //calculate distances between the actual pointer and topLeft before rotations
+            //this is for future use to figure how how to rotate the actual pointer
+            float distanceBetween_actualPointer_topLeft = calculateDistance(actualPointer, topLeft);
+            float distanceBetween_actualPointer_topRight = calculateDistance(actualPointer, topRight);
+            float distanceBetween_actualPointer_bottomLeft = calculateDistance(actualPointer, bottomLeft);
+            float distanceBetween_actualPointer_bottomRight = calculateDistance(actualPointer, bottomRight);
 
-            xPos = xLoc;
-            yPos = yLoc;// /yDivider;
+            //we need to calculate the center of this quadilateral
+            //to do that, first determine the lines that go through the center
 
-            // Pos Based on Top Left
-            MagPoint tL = new MagPoint(xPos,yPos,0);
+            //these medians will create a vertical line
+            MagPoint verticalLine_topMedian = new MagPoint((bottomLeft.xPoint+bottomRight.xPoint)/2, (bottomLeft.yPoint+bottomRight.yPoint)/2, 0);
+            MagPoint verticalLine_bottomMedian = new MagPoint((topLeft.xPoint+topRight.xPoint)/2, (topLeft.yPoint+topRight.yPoint)/2, 0);
 
-            // CENTERED ON BOTTOM LEFT
+            //these medians will create a horizontal line
+            MagPoint horizontalLine_leftMedian = new MagPoint((topLeft.xPoint+bottomLeft.xPoint)/2, (topLeft.yPoint+bottomLeft.yPoint)/2, 0);
+            MagPoint horizontalLine_rightMedian = new MagPoint((topRight.xPoint+bottomRight.xPoint)/2, (topRight.yPoint+bottomRight.yPoint)/2, 0);
 
-            // Rotation angle around Z
-            theta = (float)Math.atan((bottomLeft.yPoint - bottomRight.yPoint)/(bottomRight.xPoint - bottomLeft.xPoint));
+            //create a line equation for the vertical line
+            float verticalLine_slope = (verticalLine_bottomMedian.yPoint - verticalLine_topMedian.yPoint)/(verticalLine_bottomMedian.xPoint - verticalLine_topMedian.xPoint);
+            float horizontalLine_slope = (horizontalLine_rightMedian.yPoint - horizontalLine_leftMedian.yPoint)/(horizontalLine_rightMedian.xPoint - horizontalLine_leftMedian.xPoint);
 
-            // Rotate around z axis
-            y32 = (float)(topLeft.xPoint * Math.sin(theta) + topLeft.yPoint * Math.cos(theta));
-            y22 = (float)(bottomLeft.xPoint * Math.sin(theta) + bottomLeft.yPoint * Math.cos(theta));
-            y12 = (float)(bottomRight.xPoint * Math.sin(theta) + bottomRight.yPoint * Math.cos(theta));
-            x32 = (float)(topLeft.xPoint * Math.cos(theta) - topLeft.yPoint * Math.sin(theta));
-            x22 = (float)(bottomLeft.xPoint * Math.cos(theta) - bottomLeft.yPoint * Math.sin(theta));
-            x12 = (float)(bottomRight.xPoint * Math.cos(theta) - bottomRight.yPoint * Math.sin(theta));
+            float verticalLine_bValue = verticalLine_bottomMedian.yPoint - (verticalLine_slope*verticalLine_bottomMedian.xPoint);
+            float horizontal_bValue = horizontalLine_rightMedian.yPoint - (horizontalLine_slope*horizontalLine_rightMedian.xPoint);
 
-            // Rotation angle around Y
-            theta2 = (float)Math.atan((bottomRight.zPoint - bottomLeft.zPoint)/(bottomRight.xPoint - bottomLeft.xPoint));
+            float centroid_xValue = (horizontal_bValue - verticalLine_bValue)/(verticalLine_slope-horizontalLine_slope);
+            float centroid_yValue = (verticalLine_slope * centroid_xValue) + verticalLine_bValue;
 
-            // Rotate around y axis
-            y3 = (float)(x32 * Math.sin(theta2) + y32 * Math.cos(theta2));
-            y2 = (float)(x22 * Math.sin(theta2) + y22 * Math.cos(theta2));
-            y1 = (float)(x12 * Math.sin(theta2) + y12 * Math.cos(theta2));
-            x3 = (float)(x32 * Math.cos(theta2) - y32 * Math.sin(theta2));
-            x2 = (float)(x22 * Math.cos(theta2) - y22 * Math.sin(theta2));
-            x1 = (float)(x12 * Math.cos(theta2) - y12 * Math.sin(theta2));
+            MagPoint centroidPoint = new MagPoint(centroid_xValue, centroid_yValue, 0);
 
-            // Scale and offset
-            a = 1.0f/(x1-x2);
-            b = 1.0f/(y1-y3);
-            i = 1.0f - a*bottomRight.xPoint;
-            j = 1.0f - b*bottomRight.yPoint;
+            float distanceBetween_centroid_topLeft = calculateDistance(centroidPoint, topLeft);
+            float distanceBetween_centroid_topRight = calculateDistance(centroidPoint, topRight);
+            float distanceBetween_centroid_bottomLeft = calculateDistance(centroidPoint, bottomLeft);
+            float distanceBetween_centroid_bottomRight = calculateDistance(centroidPoint, bottomRight);
 
-            newX = (float)(actualPointer.xPoint * Math.cos(theta) - actualPointer.yPoint * Math.sin(theta));
-            newY = (float)(actualPointer.xPoint * Math.sin(theta) + actualPointer.yPoint * Math.cos(theta));
+            float topLeftPercentage = 0;
+            float topRightPercentage = 0;
+            float bottomLeftPercentage = 0;
+            float bottomRightPercentage = 0;
 
-            newX2 = (float)(newX * Math.cos(theta2) - newY * Math.sin(theta2));
-            newY2 = (float)(newX * Math.sin(theta2) + newY * Math.cos(theta2));
+            if(distanceBetween_actualPointer_topLeft < distanceBetween_centroid_topLeft)
+                topLeftPercentage = 1 - (distanceBetween_actualPointer_topLeft/distanceBetween_centroid_topLeft);
 
-            xRatio = (a*newX2 + i);
-            yRatio = (b*newY2 + j);
-            xLoc = xRatio * width;
-            yLoc = yRatio * height;
+            if(distanceBetween_actualPointer_topRight < distanceBetween_centroid_topRight)
+                topRightPercentage = 1 - (distanceBetween_actualPointer_topRight/distanceBetween_centroid_topRight);
 
+            if(distanceBetween_actualPointer_bottomLeft < distanceBetween_centroid_bottomLeft)
+                bottomLeftPercentage = 1 - (distanceBetween_actualPointer_bottomLeft/distanceBetween_centroid_bottomLeft);
 
-            fixRatio = bottomLeft.yPoint / bottomRight.yPoint;
-            yDivider = fixRatio*2 - xRatio*(fixRatio*2-1.0f);
+            if(distanceBetween_actualPointer_bottomLeft < distanceBetween_centroid_bottomLeft)
+                bottomRightPercentage = 1 - (distanceBetween_actualPointer_bottomLeft/distanceBetween_centroid_bottomLeft);
 
-            xPos = xLoc;
-            yPos = yLoc;// /yDivider;
+            //=====================
+            //   Rotate Corners
+            //=====================
 
-            // Pos Based on Bottom Left
-            MagPoint bL = new MagPoint(xPos,yPos,0);
+            //======Rotate Top Left=======
+            //================================
 
-            // CENTERED ON BOTTOM RIGHT
+            //rotate top left to align with TR
+            float topLeft_rotation_hypotenuse = (float) Math.sqrt(Math.pow(topLeft.xPoint,2)+Math.pow(topLeft.yPoint,2));
 
-            // Rotation angle around Z
-            theta = (float)Math.atan((topRight.yPoint - bottomRight.yPoint)/(bottomRight.xPoint - topRight.xPoint));
+            //multiply angle by negative to rotate towards the x axis and eliminate the y value
+            float topLeft_rotationAngle_radians = (float) -Math.acos(topLeft.xPoint / topLeft_rotation_hypotenuse);
 
-            // Rotate around z axis
-            y32 = (float)(bottomLeft.xPoint * Math.sin(theta) + bottomLeft.yPoint * Math.cos(theta));
-            y22 = (float)(bottomRight.xPoint * Math.sin(theta) + bottomRight.yPoint * Math.cos(theta));
-            y12 = (float)(topRight.xPoint * Math.sin(theta) + topRight.yPoint * Math.cos(theta));
-            x32 = (float)(bottomLeft.xPoint * Math.cos(theta) - bottomLeft.yPoint * Math.sin(theta));
-            x22 = (float)(bottomRight.xPoint * Math.cos(theta) - bottomRight.yPoint * Math.sin(theta));
-            x12 = (float)(topRight.xPoint * Math.cos(theta) - topRight.yPoint * Math.sin(theta));
+            //rotate with an angle
+            topLeft = rotateWithAngle(topLeft_rotationAngle_radians, topLeft);
 
-            // Rotation angle around Y
-            theta2 = (float)Math.atan((bottomRight.zPoint - bottomLeft.zPoint)/(bottomRight.xPoint - bottomLeft.xPoint));
+            //======Rotate Bottom Right=======
+            //============================
 
-            // Rotate around y axis
-            y3 = (float)(x32 * Math.sin(theta2) + y32 * Math.cos(theta2));
-            y2 = (float)(x22 * Math.sin(theta2) + y22 * Math.cos(theta2));
-            y1 = (float)(x12 * Math.sin(theta2) + y12 * Math.cos(theta2));
-            x3 = (float)(x32 * Math.cos(theta2) - y32 * Math.sin(theta2));
-            x1 = (float)(x12 * Math.cos(theta2) - y12 * Math.sin(theta2));
+            //rotate bottom right to line it up with TR's x value (which is 0)
+            float bottomRight_rotation_hypotenuse = (float) Math.sqrt(Math.pow(bottomRight.xPoint,2)+Math.pow(bottomRight.yPoint,2));
 
-            // Scale and offset
-            a = 1.0f/(x1-x3);
-            b = 1.0f/(y3-y1);
-            i = 1.0f - a*bottomRight.xPoint;
-            j = 1.0f - b*bottomRight.yPoint;
-
-            newX = (float)(actualPointer.xPoint * Math.cos(theta) - actualPointer.yPoint * Math.sin(theta));
-            newY = (float)(actualPointer.xPoint * Math.sin(theta) + actualPointer.yPoint * Math.cos(theta));
-
-            newX2 = (float)(newX * Math.cos(theta2) - newY * Math.sin(theta2));
-            newY2 = (float)(newX * Math.sin(theta2) + newY * Math.cos(theta2));
-
-            xRatio = (a*newX2 + i);
-            yRatio = (b*newY2 + j);
-            xLoc = xRatio * width;
-            yLoc = yRatio * height;
-
-
-            fixRatio = bottomLeft.yPoint / bottomRight.yPoint;
-            yDivider = fixRatio*2 - xRatio*(fixRatio*2-1.0f);
-
-            xPos = xLoc;
-            yPos = yLoc;// /yDivider;
-
-            // Pos Based on Bottom Right
-            MagPoint bR = new MagPoint(xPos,yPos,0);
-
-
-            // Weight Reference Points
-            MagPoint[] ref = new MagPoint[]{topRight,topLeft,bottomLeft,bottomRight};
-            MagPoint[] ret = new MagPoint[]{tR,tL,bL,bR};
-            float[] weights = new float[4];
-            float totalWeight = 0.0f;
-
-            for(int index = 0; index < 3; index++){
-                weights[index] = 1.0f/(float)Math.pow(distance(actualPointer,ref[index]),3);
-                totalWeight += weights[index];
+            //positive sign
+            float bottomRight_sign = 1;
+            if(bottomRight.xPoint < 0) {
+                bottomRight_sign = -1;
             }
 
-            xPos = 0.0f;
-            yPos = 0.0f;
+            //rotate towards the y axis and eliminate the x value
+            float bottomRight_rotationAngle_radians = (float) (bottomRight_sign * Math.acos(bottomRight.yPoint / bottomRight_rotation_hypotenuse));
 
-            for(int index = 0; index < 3; index++){
-                xPos += ret[index].xPoint * weights[index];
-                yPos += ret[index].yPoint * weights[index];
+            //rotate with an angle
+            bottomRight = rotateWithAngle(bottomRight_rotationAngle_radians, bottomRight);
+
+            //======Rotate Bottom Left=======
+            //=============================
+
+            //rotating the bottom left gets a little trickier.
+            //we either need to scale up or scale down the bottom left value
+            //the bottom left will also need to be rotated to be on the same slope as the intended bottom left value
+
+            //basically we want to align the top lefts's x value with BL's x value and
+            //align the BR's y with BL's Y
+
+            float bottomLeft_rotation_hypotenuse = (float) Math.sqrt(Math.pow(bottomLeft.xPoint,2)+Math.pow(bottomLeft.yPoint,2));
+            float bottomLeft_positive_rotationAngle_degrees = 0;
+            boolean positiveRotationEnabled = false;
+            if(bottomLeft.xPoint < 0)
+            {
+                positiveRotationEnabled = true;
+
+                //rotate towards the y axis and eliminate the x value
+                bottomLeft_positive_rotationAngle_degrees = (float) (-2*(Math.acos(bottomLeft.yPoint / bottomLeft_rotation_hypotenuse)));
+                bottomLeft = rotateWithAngle(bottomLeft_positive_rotationAngle_degrees, bottomLeft);
             }
 
-            xPos /= totalWeight;
-            yPos /= totalWeight;
 
-            //xPos = bR.xPoint;
-            //yPos = bR.yPoint;
+                //rotate towards the y axis and eliminate the x value
+            float bottomLeft_rotationAngle_degrees = (float) Math.toDegrees(Math.acos(bottomLeft.xPoint / bottomLeft_rotation_hypotenuse));
 
+
+            //the desired topRight in the square
+            MagPoint desiredBottomLeft = new MagPoint(topLeft.xPoint, bottomRight.yPoint, bottomLeft.zPoint);
+
+            //determine new top right on slope
+            //this is done using the top right value that we do want and extending it or shortening it on the same line
+            //float bottomLeft_desired_slope = desiredBottomLeft.yPoint/desiredBottomLeft.xPoint;
+
+            //float bottomLeft_onSlope_x_value = topLeft.xPoint;
+            //float bottomLeft_onSlope_y_value = (bottomLeft_desired_slope*(bottomLeft.xPoint-desiredBottomLeft.xPoint))+desiredBottomLeft.yPoint;
+
+            //now we have the bottom left value on the slope
+            //MagPoint new_bottomLeft_onSlope = new MagPoint(bottomLeft_onSlope_x_value, bottomLeft_onSlope_y_value, bottomLeft.zPoint);
+            //float new_bottomLeft_onSlope_hypotenuse = (float) Math.sqrt(Math.pow(new_bottomLeft_onSlope.xPoint,2)+Math.pow(new_bottomLeft_onSlope.yPoint,2));
+
+            float desiredSlope_hypotenuse = (float) Math.sqrt(Math.pow(desiredBottomLeft.xPoint,2)+Math.pow(desiredBottomLeft.yPoint,2));
+
+            //determine angle to rotate. this is multiplied by negative to rotate in the clockwise direction
+            float desiredSlope_angle_degrees = (float) Math.toDegrees(Math.acos(desiredBottomLeft.xPoint / desiredSlope_hypotenuse));
+            float new_bottomLeft_onSlope_rotationAngle_radians = (float) -Math.toRadians(bottomLeft_rotationAngle_degrees - desiredSlope_angle_degrees);
+
+            //now actually rotate this darn thing
+            bottomLeft = rotateWithAngle(new_bottomLeft_onSlope_rotationAngle_radians, bottomLeft);
+
+            //we are not done yet! we still have to scale down the top right value
+            //don't worry, almost there! ill have to figure out how to optimize this later
+
+            //scale down/up value
+            float scaleFactor = bottomLeft.xPoint/topLeft.xPoint;
+
+            //these new values should be close to BR's x and TL's y
+            bottomLeft.xPoint = bottomLeft.xPoint/scaleFactor;
+            bottomLeft.yPoint = bottomLeft.yPoint/scaleFactor;
+
+            //=====================
+            //Modify Actual Pointer for Rotations
+            //=====================
+
+            //percentages have been calculated above
+            //use these percentages to see how much these rotations effect the actual pointer
+
+            //actual pointer rotated with top left rotation angle
+            MagPoint actualPointer_rotated_topLeft = rotateWithAngle(topLeft_rotationAngle_radians, actualPointer);
+            float actualPointer_rotated_topLeft_x_diff = actualPointer_rotated_topLeft.xPoint - actualPointer.xPoint;
+            float actualPointer_rotated_topLeft_y_diff = actualPointer_rotated_topLeft.yPoint - actualPointer.yPoint;
+
+            //actual pointer rotated with bottom right rotation angle
+            MagPoint actualPointer_rotated_bottomRight = rotateWithAngle(bottomRight_rotationAngle_radians, actualPointer);
+            float actualPointer_rotated_bottomRight_x_diff = actualPointer_rotated_bottomRight.xPoint - actualPointer.xPoint;
+            float actualPointer_rotated_bottomRight_y_diff = actualPointer_rotated_bottomRight.yPoint - actualPointer.yPoint;
+
+            //actual pointer rotated with top right rotation angle
+            MagPoint actualPointer_rotated_bottomLeft = actualPointer;
+            if(positiveRotationEnabled)
+            {
+                actualPointer_rotated_bottomLeft = rotateWithAngle(bottomLeft_positive_rotationAngle_degrees, actualPointer_rotated_bottomLeft);
+            }
+
+            actualPointer_rotated_bottomLeft = rotateWithAngle(new_bottomLeft_onSlope_rotationAngle_radians, actualPointer_rotated_bottomLeft);
+
+            //this value will also need to be scaled since top right is scaled
+            actualPointer_rotated_bottomLeft.xPoint = actualPointer_rotated_bottomLeft.xPoint/scaleFactor;
+            actualPointer_rotated_bottomLeft.yPoint = actualPointer_rotated_bottomLeft.yPoint/scaleFactor;
+
+            float actualPointer_rotated_bottomLeft_x_diff = actualPointer_rotated_bottomLeft.xPoint - actualPointer.xPoint;
+            float actualPointer_rotated_bottomLeft_y_diff = actualPointer_rotated_bottomLeft.yPoint - actualPointer.yPoint;
+
+            //now after percentages and differences have been calculated
+            //make adjustments to the actual pointer
+            actualPointer.xPoint += actualPointer_rotated_topLeft_x_diff * topLeftPercentage;
+            actualPointer.xPoint += actualPointer_rotated_bottomRight_x_diff * bottomRightPercentage;
+            actualPointer.xPoint += actualPointer_rotated_bottomLeft_x_diff * bottomLeftPercentage;
+
+            actualPointer.yPoint += actualPointer_rotated_topLeft_y_diff * topLeftPercentage;
+            actualPointer.yPoint += actualPointer_rotated_bottomRight_y_diff * bottomRightPercentage;
+            actualPointer.yPoint += actualPointer_rotated_bottomLeft_y_diff * bottomLeftPercentage;
+
+            Log.d(TAG, "Top Left: "+topLeftPercentage);
+            Log.d(TAG, "Top Right: "+bottomRightPercentage);
+            Log.d(TAG, "Bottom Left: "+bottomLeftPercentage);
+//            Log.d(TAG, "Bottom Right: "+bottomRight);
+
+            xPos = topLeft.xPoint - actualPointer.xPoint;
+            yPos = -topLeft.yPoint + actualPointer.yPoint;
         }
 
         return new MagPoint(xPos, yPos, 0);
     }
+
+    //note this only calculates distance in the x and y axis
+    private static float calculateDistance(MagPoint p1, MagPoint p2)
+    {
+        return (float) Math.sqrt((p1.xPoint-p2.xPoint)*(p1.xPoint-p2.xPoint) + (p1.yPoint-p2.yPoint)*(p1.yPoint-p2.yPoint));
+    }
+
+    //rotate around the y axis
+    private static MagPoint flattenZAxis(MagPoint point)
+    {
+        float zFlatten_hypotenuse = (float) Math.sqrt(Math.pow(point.yPoint,2)+Math.pow(point.zPoint,2));
+
+        //multiply angle by negative to rotate towards the y axis and eliminate the z value
+        float zFlatten_rotationAngle_radians = (float) -Math.acos(point.yPoint/zFlatten_hypotenuse);
+
+        float new_y_value = (float) ((float) (point.yPoint*Math.cos(zFlatten_rotationAngle_radians)) - (point.zPoint*Math.sin(zFlatten_rotationAngle_radians)));
+        float new_z_value = (float) ((float) (point.yPoint*Math.sin(zFlatten_rotationAngle_radians)) + (point.zPoint*Math.cos(zFlatten_rotationAngle_radians)));
+
+        return new MagPoint(point.xPoint, new_y_value, new_z_value);
+    }
+
+    private static MagPoint rotateWithAngle(float rotationAngleInRadians, MagPoint point)
+    {
+        float new_x_value = (float) ((float) (point.xPoint * Math.cos(rotationAngleInRadians)) - (point.yPoint * Math.sin(rotationAngleInRadians)));
+        float new_y_value = (float) ((float) (point.yPoint * Math.cos(rotationAngleInRadians)) + (point.xPoint * Math.sin(rotationAngleInRadians)));
+
+        return new MagPoint(new_x_value, new_y_value, point.zPoint);
+    }
+
+
 
     // Low-pass filter
     public static float[] lowPass(float[] currentValues, float[] previousValues){

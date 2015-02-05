@@ -34,4 +34,18 @@ public class MagPoint {
         return (float)Math.sqrt(Math.pow(xPoint,2.0) + Math.pow(yPoint,2.0) + Math.pow(zPoint,2.0));
     }
 
+    public void subtract(MagPoint sub)
+    {
+        xPoint -= sub.xPoint;
+        yPoint -= sub.yPoint;
+        zPoint -= sub.zPoint;
+    }
+
+    public String toString()
+    {
+        return String.format("MagPoint: x: %.4f | y: %.4f | z: %.4f", xPoint, yPoint, zPoint);
+    }
+
+
+
 }

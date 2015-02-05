@@ -13,11 +13,13 @@
         <item>Four Screen Corners</item>
         <item>Trilateration</item>
         <item>Projection on Planes</item>
+        <item>Rotational Matricies</item>
     </string-array>
     <string-array name="pref_interpolation_algorithm_values">
         <item>0</item>
         <item>1</item>
         <item>2</item>
+        <item>3</item>
     </string-array>
 
 </resources>

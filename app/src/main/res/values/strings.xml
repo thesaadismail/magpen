@@ -12,5 +12,6 @@
     <string name="zero_button_text"> Zero Readings</string>
     <string name="calibration_button_text">Calibrate Top Left</string>
     <string name="beginCalibrationText">Tap Here to Begin Calibration</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
