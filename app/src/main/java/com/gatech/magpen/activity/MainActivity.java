@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.gatech.magpen.R;
+import com.gatech.magpen.fragment.MagGridFragment;
 import com.gatech.magpen.fragment.MainFragment;
 import com.gatech.magpen.fragment.SensorReadingsFragment;
 
@@ -53,6 +54,14 @@ public class MainActivity extends ActionBarActivity {
         else if(id == R.id.action_viewSensorReadings){
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             ft.replace(R.id.container, new SensorReadingsFragment());
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+            ft.addToBackStack(null);
+            ft.commit();
+            return true;
+        }
+        else if(id == R.id.action_maggrid){
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.replace(R.id.container, new MagGridFragment());
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
             ft.addToBackStack(null);
             ft.commit();

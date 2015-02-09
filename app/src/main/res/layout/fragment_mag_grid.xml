@@ -1,0 +1,105 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.gatech.magpen.fragment.MagGridFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/gridParametersLayout"
+        android:layout_gravity="center_horizontal|top"
+        android:gravity="center_horizontal"
+        android:layout_margin="10dp">
+
+        <RelativeLayout
+            android:id="@+id/numOfRowsLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|top">
+
+            <TextView
+                android:id="@+id/numOfRowsTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:text="Rows" />
+
+            <EditText
+                android:id="@+id/numOfRowsEditText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/numOfRowsTitle"
+                android:inputType="number"
+                android:text="4"
+                android:hint="enter # of rows" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/numOfColsLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|top"
+            android:layout_toRightOf="@id/numOfRowsLayout">
+
+            <TextView
+                android:id="@+id/numOfColsTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:text="Cols" />
+
+            <EditText
+                android:id="@+id/numOfColsEditText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/numOfColsTitle"
+                android:inputType="number"
+                android:text="4"
+                android:hint="enter # of cols" />
+
+        </RelativeLayout>
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Generate"
+            android:layout_below="@+id/numOfRowsLayout"
+            android:id="@+id/generateButton"
+            android:layout_alignRight="@+id/numOfColsLayout"
+            android:layout_alignEnd="@+id/numOfColsLayout" />
+
+    </RelativeLayout>
+
+
+
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/magGridTableLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/gridParametersLayout"
+        android:layout_gravity="center" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Log Values (MatLab)"
+        android:id="@+id/saveValuesButton"
+        android:visibility="gone"
+        android:layout_below="@+id/magGridTableLayout"
+        android:layout_gravity="center_horizontal|bottom" />
+
+    </RelativeLayout>
+</FrameLayout>
